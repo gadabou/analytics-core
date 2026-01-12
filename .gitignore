@@ -1,0 +1,17 @@
+node_modules
+package-lock.json
+.env
+.env-example
+.idea
+.vscode
+.angular
+z_to_delete
+my-test
+old-webviewapp
+old-webapp
+old-api
+webapp/test
+webapp/uploads
+webapp/converted_forms
+webapp/venv
+pythons

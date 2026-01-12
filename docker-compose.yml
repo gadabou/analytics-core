@@ -1,0 +1,201 @@
+services:
+
+  # Conteneur d'init pour créer les dossiers et gérer les permissions
+  ih-cht-init-volumes:
+    image: alpine:latest
+    container_name: ih-cht-init-volumes
+    command: >
+      sh -c "
+        mkdir -p /postgres_data /pgadmin_data /cloudbeaver_data &&
+        chown -R 999:999 /postgres_data &&
+        chmod -R 700 /postgres_data &&
+        chown -R 1000:1000 /pgadmin_data &&
+        chmod -R 700 /pgadmin_data &&
+        chown -R 1000:1000 /cloudbeaver_data &&
+        chmod -R 700 /cloudbeaver_data &&
+        tail -f /dev/null
+      "
+    volumes:
+      - ${POSTGRES_DATA_DIR:-./app_data/postgres}:/postgres_data
+      - ${PGADMIN_DATA_DIR:-./app_data/pgadmin}:/pgadmin_data
+      - ${DBEAVER_DATA_DIR:-./app_data/cloudbeaver}:/cloudbeaver_data
+    restart: "no"
+    healthcheck:
+      test: >
+        sh -c "
+          [ -d /postgres_data ] &&
+          [ -d /pgadmin_data ] &&
+          [ -d /cloudbeaver_data ] &&
+          [ $(stat -c %u /postgres_data) -eq 999 ] &&
+          [ $(stat -c %u /pgadmin_data) -eq 1000 ] &&
+          [ $(stat -c %u /cloudbeaver_data) -eq 1000 ]
+        "
+      interval: 5s
+      retries: 3
+      start_period: 1s
+      timeout: 2s
+
+
+  ih-cht-manage-postgres:
+    image: postgres:16
+    container_name: ih-cht-manage-postgres
+    shm_size: '2g'
+    restart: always
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ${POSTGRES_DATA_DIR:-./app_data/postgres}:/var/lib/postgresql/data
+      - ./ih-cht-manage-core/configs/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./ih-cht-manage-core/configs/init:/docker-entrypoint-initdb.d
+    command: >
+      postgres
+      -c listen_addresses='*'
+      -c hba_file=/etc/postgresql/pg_hba.conf
+    depends_on:
+      ih-cht-init-volumes:
+        condition: service_healthy
+    networks:
+      - ih-cht-manage-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # ports:
+    #   - "5432:5432"
+
+  ih-cht-manage-backend:
+    build:
+      context: ./ih-cht-manage-core/backend
+      dockerfile: Dockerfile.backend
+    container_name: ih-cht-manage-backend
+    depends_on:
+      ih-cht-init-volumes:
+        condition: service_healthy
+      ih-cht-manage-postgres:
+        condition: service_healthy
+    env_file: .env
+    ports:
+      - "${BACKEND_PORT:?BACKEND_PORT must be set}:${BACKEND_PORT:?BACKEND_PORT must be set}"
+    environment:
+      BACKEND_HOST: ${BACKEND_HOST:-0.0.0.0}
+      BACKEND_PORT: ${BACKEND_PORT:?BACKEND_PORT must be set}
+      BACKEND_USE_SSL: ${BACKEND_USE_SSL}
+
+      POSTGRES_HOST: ih-cht-manage-postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+      DHIS2_URL: ${DHIS2_URL}
+      DHIS2_USER: ${DHIS2_USER}
+      DHIS2_PASS: ${DHIS2_PASS}
+      PROGRAM_TRACKER_ID: ${PROGRAM_TRACKER_ID}
+
+      JWT_SECRET: ${JWT_SECRET}
+      LAST_SYNC_FILE: ${LAST_SYNC_FILE}
+
+      TIMEOUT: ${TIMEOUT}
+    volumes:
+      - ./ih-cht-manage-core/backend:/app
+    restart: unless-stopped
+    networks:
+      - ih-cht-manage-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${BACKEND_PORT:?BACKEND_PORT must be set}/api/main/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ih-cht-manage-scheduler:
+    build:
+      context: ./ih-cht-manage-core/backend
+      dockerfile: Dockerfile.scheduler
+    container_name: ih-cht-manage-scheduler
+    depends_on:
+      ih-cht-init-volumes:
+        condition: service_healthy
+      ih-cht-manage-postgres:
+        condition: service_healthy
+      ih-cht-manage-backend:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      BACKEND_HOST: ${BACKEND_HOST:-0.0.0.0}
+      BACKEND_PORT: ${BACKEND_PORT:?BACKEND_PORT must be set}
+      BACKEND_USE_SSL: ${BACKEND_USE_SSL}
+
+      POSTGRES_HOST: ih-cht-manage-postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+      DHIS2_URL: ${DHIS2_URL}
+      DHIS2_USER: ${DHIS2_USER}
+      DHIS2_PASS: ${DHIS2_PASS}
+      PROGRAM_TRACKER_ID: ${PROGRAM_TRACKER_ID}
+
+      JWT_SECRET: ${JWT_SECRET}
+      LAST_SYNC_FILE: ${LAST_SYNC_FILE}
+
+      TIMEOUT: ${TIMEOUT}
+      DEBUG: 0
+    networks:
+      - ih-cht-manage-net
+
+  # ih-cht-manage-pgadmin:
+  #   image: dpage/pgadmin4:latest
+  #   container_name: ih-cht-manage-pgadmin
+  #   restart: always
+  #   env_file: .env
+  #   ports:
+  #     - "${PGADMIN_PORT:?PGADMIN_PORT must be set}:80"
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:?PGADMIN_DEFAULT_EMAIL must be set}
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:?PGADMIN_DEFAULT_PASSWORD must be set}
+  #     PGADMIN_CONFIG_SERVER_MODE: "True"
+  #     PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "True"
+  #     PGADMIN_CONFIG_UPGRADE_CHECK_ENABLED: "False"
+  #     PGADMIN_CONFIG_SESSION_EXPIRATION_TIME: 1440
+  #     PGADMIN_CONFIG_MAX_LOGIN_ATTEMPTS: 5
+  #   volumes:
+  #     - ${PGADMIN_DATA_DIR:-./app_data/pgadmin}:/var/lib/pgadmin
+  #   networks:
+  #     - ih-cht-manage-net
+  #   depends_on:
+  #     ih-cht-init-volumes:
+  #       condition: service_healthy
+  #     ih-cht-manage-postgres:
+  #       condition: service_healthy
+
+
+  ih-cht-manage-cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: ih-cht-manage-cloudbeaver
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${DBEAVER_PORT:?DBEAVER_PORT must be set}:8978"
+    # volumes:
+    #   - ${DBEAVER_DATA_DIR:-./app_data/cloudbeaver}:/opt/cloudbeaver/workspace
+    environment:
+      CB_SERVER_NAME: ${DBEAVER_SERVER_NAME:-IH-CHT CloudBeaver}
+      CB_ADMIN_NAME: ${DBEAVER_ADMIN_NAME:?DBEAVER_ADMIN_NAME must be set}
+      CB_ADMIN_PASSWORD: ${DBEAVER_ADMIN_PASSWORD:?DBEAVER_ADMIN_PASSWORD must be set}
+      CB_SESSION_EXPIRE_TIME: 1440
+    networks:
+      - ih-cht-manage-net
+    depends_on:
+      ih-cht-init-volumes:
+        condition: service_healthy
+      ih-cht-manage-postgres:
+        condition: service_healthy
+
+
+networks:
+  ih-cht-manage-net:
+    driver: bridge
+    # external: true

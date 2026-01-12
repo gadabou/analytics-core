@@ -1,0 +1,50 @@
+<div class="login-body">
+  <!-- Country logo and name at the top-left -->
+  <div class="country-logo">
+    <img src="{{COUNTRY_LOGO}}" alt="Country Logo">
+    <div>
+      <div class="country-name">TABLEAU DE BORD DE KENDEYA</div>
+      <div class="country-subname">Bienvenue dans Kendeya Dashboards</div>
+    </div>
+  </div>
+
+
+  <!-- Login Form Section -->
+  <div class="login-form">
+    <!-- App Logo -->
+    <div class="login-header">
+      <img src="{{APP_LOGO}}" alt="App Logo">
+
+      <p class="login-title">Connexion</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="login()" autocomplete="off" novalidate>
+      <h6 *ngIf="message">{{ message }}</h6>
+
+      <div class="input-group">
+        <span class="input-group-icon"><i class="fas fa-user"></i></span>
+        <input type="text" id="username" formControlName="credential" placeholder="Username" autocomplete="off"
+          autocorrect="off" spellcheck="false" autocapitalize="none" required>
+      </div>
+
+      <br>
+      <div class="input-group">
+        <span class="input-group-icon"><i class="fas fa-lock"></i></span>
+        <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" placeholder="Mot de passe"
+          autocomplete="new-password" autocorrect="off" spellcheck="false" autocapitalize="none" required>
+          <i (click)="togglePasswordVisibility()" class="{{ showPassword ? 'fas fa-eye' : 'fas fa-eye-slash' }}"></i>
+      </div>
+
+      <button [disabled]="!loginForm.valid || isLoading" type="submit" class="login-button">
+        Se connecter
+        <span *ngIf="isLoading" class="fas fa-1x fa-sync-alt fa-spin"></span>
+      </button>
+
+      <br><br>
+      <br><br>
+
+      <a class="documentations" href="/documentations" target="_blank" rel="noopener noreferrer">Documentations</a>
+
+    </form>
+  </div>
+</div>

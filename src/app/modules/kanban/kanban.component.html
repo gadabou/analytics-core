@@ -1,0 +1,35 @@
+<section class="board" role="region" aria-label="Board">
+  <div class="board-columns">
+    <div *ngFor="let col of columns" class="column" [attr.data-id]="col.id"
+         (dragover)="onDragOver($event)" (drop)="onDrop($event,col.id)">
+      <div class="column-header">
+        <div class="title"><span class="dot" [style.background]="col.color"></span>{{col.title}}</div>
+        <div class="meta"><span class="count">{{col.tasks.length}}</span><i class="ri-more-2-line"></i></div>
+      </div>
+
+      <button class="add-btn" (click)="addTask(col.id)" aria-label="Add new task">+ Add New Task</button>
+
+      <div class="cards">
+        <article *ngFor="let t of col.tasks; trackBy: trackById" class="card"
+                 tabindex="0" role="article" draggable="true"
+                 (dragstart)="onDragStart($event, t, col.id)">
+          <div class="card-tags">
+            <span class="pill" *ngFor="let tg of t.tags">{{tg}}</span>
+            <button class="kebab" aria-label="card actions"><i class="ri-more-2-line"></i></button>
+          </div>
+          <h3 class="card-title">{{t.title}}</h3>
+          <p class="card-desc">{{t.description}}</p>
+
+          <div class="card-footer">
+            <div class="progress"><i class="ri-list-check"></i> <span>{{t.progress || ''}}</span></div>
+            <div class="stats">
+              <span class="stat"><i class="ri-eye-line"></i> {{t.views}}</span>
+              <span class="stat"><i class="ri-chat-1-line"></i> {{t.comments}}</span>
+              <span class="stat"><i class="ri-attachment-line"></i> {{t.attachments}}</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>

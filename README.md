@@ -1,0 +1,1 @@
+# kendeya-analytics-core
