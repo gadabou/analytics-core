@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from 'express';
-import { Middelware } from '../middleware/auth';
+import { Middelware } from '../middleware/middleware';
 
 const functionsRouter = Router();
 

@@ -1,5 +1,6 @@
 export interface ApiTokenAccess {
   id?: number
-  token: string
-  isActive: boolean
+  token?: string
+  tokenLen?: number
+  isActive?: boolean
 }

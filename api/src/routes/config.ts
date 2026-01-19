@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { JsonDatabase } from '../json-data-source';
-import { Middelware } from '../middleware/auth';
-import { appVersion } from '../functions/functions';
+import { Middelware } from '../middleware/middleware';
+import { appVersion } from '../utils/functions';
 
 const configRouter = Router();
 

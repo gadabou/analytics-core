@@ -1,6 +1,6 @@
 import { Entity, Column, Repository, DataSource, PrimaryGeneratedColumn } from "typeorm"
 import { AppDataSource } from '../data-source';
-import { notEmpty } from "../functions/functions";
+import { notEmpty } from "../utils/functions";
 import { Routes, FullRolesUtils } from "./User";
 
 let Connection: DataSource = AppDataSource.manager.connection;

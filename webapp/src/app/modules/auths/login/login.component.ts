@@ -80,8 +80,6 @@ export class LoginComponent implements OnInit {
           return;
         }
 
-        console.log(res)
-
         location.href = 'reports';
         return;
       },

@@ -34,6 +34,8 @@ export async function GET_CHWS_RECO_REPORTS(req: Request, res: Response, next: N
         return res.status(200).json({ status: 200, data: data });
 
     } catch (err: any) {
+        console.log('ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ')
+        console.log(err)
         return res.status(500).json({ status: 500, data: serverErrorMsg(err) });
     }
 };

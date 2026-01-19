@@ -1,129 +1,100 @@
 <div class="page-title card card-primary card-outline">
-    <div class="card-body">
-        <span style="float: left;" class="fas fa-user"> API List</span>
-        <button (click)="CreateApi()" style="float: right;" type="button" class="btn btn-default" data-toggle="modal"
-            data-target="#modal-default">
-            Add API
-        </button>
-    </div>
+  <div class="card-body d-flex justify-content-between align-items-center">
+    <span class="fas fa-user">API List</span>
+    <button type="button" class="btn btn-success" (click)="openModal('create')">Add API</button>
+  </div>
 </div>
 
-<div class="page-content-wrap">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-
-                </div>
-                <div class="panel-body">
-                    <table class="table datatable">
-                        <thead>
-                            <tr>
-                                <th>id</th>
-                                <th>Token</th>
-                                <th>IsActive</th>
-                                <th colspan="2">Actions</th>
-                            </tr>
-                        </thead>
-
-
-                        <tbody *ngFor="let api of apis$">
-                            <tr>
-                                <td>{{ api.id }}</td>
-                                <td>{{ api.token }}</td>
-                                <td>{{ api.isActive ? 'OK' : 'NO ACCESS' }}</td>
-                                <td>
-                                    <i (click)="EditApi(api)" class="btn-warning fas fa-edit" data-toggle="modal"
-                                        data-target="#modal-default"></i>
-                                </td>
-                                <td>
-                                    <i (click)="ApiSelected(api)" class="btn-danger fas fa-trash-alt"
-                                        data-toggle="modal" data-target="#modal-danger"></i>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+<div class="page-content-wrap mt-3">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body p-0">
+          <table class="table table-striped mb-0">
+            <thead class="thead-light">
+              <tr>
+                <th>Id</th>
+                <th>Token</th>
+                <th>Status</th>
+                <th colspan="3">Actions</th>
+              </tr>
+            </thead>
+            <tbody *ngFor="let api of apis$">
+              <tr>
+                <td>{{ api.id }}</td>
+                <td>{{ api.token }}</td>
+                <td>
+                  <button [disabled]="isActiving" class="btn btn-warning btn-sm" (click)="SetActive(api)">
+                    <!-- <i class="fas fa-edit"></i> -->
+                    {{ api.isActive ? 'ACTIVE' : 'DISABLED' }}
+                  </button>
+                </td>
+                <td>
+                  <button [disabled]="loading" class="btn btn-warning btn-sm" (click)="openModal('refresh', api)">
+                    <i class="fas fa-refresh"></i>
+                  </button>
+                </td>
+                <td>
+                  <button [disabled]="loading" class="btn btn-danger btn-sm" (click)="openModal('delete', api)">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
-
-
-<div class="modal fade" id="modal-default">
-    <div class="modal-dialog">
-        <form [formGroup]="apiForm" (ngSubmit)="CreateOrUpdateApi()" novalidate class="form-horizontal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <!-- <img height="30" class="modal-title" src="{{ APP_LOGO}}" alt="" srcset=""> -->
-
-                    <strong style="text-align: center;" class="login-box-msg"><span
-                            class=" btn-{{ isEditMode?'warning':'success' }}">
-                            {{ isEditMode ? 'Modifier un utilisateur' :'Ajouter un utilisateur' }}</span></strong>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span>&times;</span>
-                        <!-- <span [attr.aria-hidden]="isHidden ? 'true' : null" [attr.inert]="isHidden ? '' : null">&times;</span> -->
-                    </button>
-                </div>
-
-                <div class="modal-body">
-                    <p *ngIf="message!=''" class="login-box-msg"><strong>{{ message }}</strong></p>
-
-                    <h1 *ngIf="isEditMode">Token</h1>
-                    <div class="input-group mb-3">
-                        <input id="api-token" (input)="generateTokenLenght($event)" id="token" type="text" [maxlength]="defaultTokenLenght" class="form-control" placeholder="Token" formControlName="token" />
-                    </div>
-
-                    <p>{{ tokenLenght }} / <strong>{{ defaultTokenLenght }}</strong></p>
-
-                    <br>
-
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="input-group mb-3">
-                                <div class="icheck-primary">
-                                    <input type="checkbox" id="isActive" formControlName="isActive">
-                                    <label for="isActive">Activer</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                </div>
-                <div class="modal-footer justify-content-between">
-                    <button id="close-modal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button [disabled]="!apiForm.valid" type="submit"
-                        class="btn btn-{{isEditMode ? 'warning': 'success'}}">{{isEditMode ? 'Modifier':'Sauvegarder'}}
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div class="modal fade" id="modal-danger">
-    <div class="modal-dialog">
-        <div class="modal-content bg-danger">
-            <div class="modal-header">
-
-                <h4 class="modal-title">Suppression d'utilisateur</h4>
-                <button id="close-delete-modal" type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                Cette action est iréversible! Êtes vous sûr de procéder à la suppression ?
-
-                <p class="login-box-msg"><strong>{{ message }}</strong></p>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
-                <button (click)="DeleteApi()" type="button" class="btn btn-danger swalDefaultSuccess">Oui Supprimer
-                    !</button>
-            </div>
+<!-- Add/Edit Modal -->
+<div *ngIf="showModalFlag" class="custom-modal" (click)="closeModal()">
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
+    <form [formGroup]="apiForm" (ngSubmit)="CreateOrUpdateApi()" class="form-horizontal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ isEditMode ? 'Modifier' : 'Ajouter' }} un API</h5>
+          <button type="button" class="close" (click)="closeModal()">&times;</button>
         </div>
-    </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="tokenLen">Token</label>
+            <input type="text" [min]="tokenLenMin" [max]="tokenLenMax" class="form-control" id="tokenLen" formControlName="tokenLen">
+          </div>
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="isActive" formControlName="isActive" style="width: 30px; height: 30px;">
+            <label class="form-check-label" for="isActive" style="font-size: large;margin-top: 10px;"> Activer</label>
+          </div>
+          <p *ngIf="message" class="text-danger">{{ message }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+          <button [disabled]="loading" type="submit" class="btn btn-{{ isEditMode ? 'warning' : 'success' }}" [disabled]="!apiForm.valid">
+            {{ isEditMode ? 'Modifier' : 'Sauvegarder' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
+
+<!-- Delete Modal -->
+<div *ngIf="showDeleteModalFlag" class="custom-modal" (click)="closeModal()">
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content bg-danger text-white">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmer la suppression</h5>
+        <button type="button" class="close text-white" (click)="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        Cette action est irréversible !
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="closeModal()">Annuler</button>
+        <button type="button" class="btn btn-danger" (click)="DeleteApi()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>
+

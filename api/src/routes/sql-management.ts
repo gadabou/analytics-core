@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { Middelware } from "../middleware/auth";
+import { Middelware } from "../middleware/middleware";
 import { getAllMigrationsPathList, runAllMigrationsAvailable, getOneMigrationsPath, runOneMigrationAvailable } from '../controllers/sql-views-manage';
 import { body } from 'express-validator';
 

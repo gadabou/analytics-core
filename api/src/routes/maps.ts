@@ -1,7 +1,7 @@
 
 
 import { Router } from 'express';
-import { Middelware } from "../middleware/auth";
+import { Middelware } from "../middleware/middleware";
 import { GET_RECO_DATA_MAPS } from '../controllers/MAPS/maps';
 
 const Maps = Router();

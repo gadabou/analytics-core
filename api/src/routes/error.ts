@@ -5,19 +5,20 @@ import { SRC_FOLDER } from "../providers/constantes";
 
 
 export class Errors {
-  static get404 =(req: Request, res: Response) => {
+  static get404 = (req: Request, res: Response) => {
     // return res.status(404).send('Not found.')
     return res.status(404).sendFile(join(SRC_FOLDER, 'public', '404.html'));
   };
 
-  static getErrors = (error: any, req: Request, res: Response, next: NextFunction) => {
-    if (error.noStaticFiles) {
+  static getErrors = (err: any, req: Request, res: Response, next: NextFunction) => {
+    console.error(err);
+    if (err?.noStaticFiles) {
       return res.status(404).sendFile(join(SRC_FOLDER, 'public', '404.html'));
     } else {
-      return res.status(error.statusCode || 500).json({
+      return res.status(err?.statusCode || 500).json({
         error: {
-          message: error.message,
-          data: error.data,
+          message: err?.message || 'Internal Server Error',
+          data: err?.data ?? null,
         },
       });
     }

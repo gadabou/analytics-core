@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 import { DeleteFromCouchDb, databaseEntitiesList, GetRecoDataToBeDeleteFromCouchDb, DeleteAllDataFromDatabase, UpdateUserFacilityIdAndContactPlace } from "../controllers/databases";
-import { Middelware } from "../middleware/auth";
+import { Middelware } from "../middleware/middleware";
 
 const express = require('express');
 const databaseRouter = express.Router();
