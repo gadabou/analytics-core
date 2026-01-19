@@ -31,6 +31,11 @@ if (environment.production) {
   enableProdMode();
 }
 
+window.onerror = function (msg, url, line, col, error) {
+  console.error('GLOBAL ERROR:', error);
+};
+
+
 platformBrowserDynamic()
   .bootstrapModule(AppModule)
   .catch((err) => console.error(err));

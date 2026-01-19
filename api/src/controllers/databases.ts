@@ -3,7 +3,7 @@ import { validationResult } from "express-validator";
 import { DataSource, EntityMetadata } from "typeorm";
 import { AppDataSource } from "../data-source";
 import request from 'request';
-import { httpHeaders, notEmpty } from "../functions/functions";
+import { httpHeaders, notEmpty } from "../utils/functions";
 import { ENV } from "../providers/constantes";
 import { RecoPerformanceDashboard, RecoVaccinationDashboardDbOutput } from "../models/dashboards";
 import { ChwsRecoReport, FamilyPlanningReport, HouseholdRecapReport, MorbidityReport, PcimneNewbornReport, PromotionReport, RecoMegSituationReport } from "../models/reports";

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
-import { notEmpty } from "../../functions/functions";
-import { milisecond_to_date } from '../../functions/date-utils';
+import { notEmpty } from "../../utils/functions";
+import { milisecond_to_date } from '../../utils/date-utils';
 import { COUNTRIES_CUSTOM_QUERY, REGIONS_CUSTOM_QUERY, PREFECTURES_CUSTOM_QUERY, COMMUNES_CUSTOM_QUERY, HOSPITALS_CUSTOM_QUERY, DISTRICTS_QUARTIERS_CUSTOM_QUERY, CHWS_CUSTOM_QUERY, VILLAGES_SECTEURS_CUSTOM_QUERY, RECOS_CUSTOM_QUERY, FAMILIES_CUSTOM_QUERY, PATIENTS_CUSTOM_QUERY } from './org-units-custom';
 
 

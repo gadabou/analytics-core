@@ -4,13 +4,13 @@
   "description": "",
   "main": "",
   "scripts": {
-    "server1": "node --inspect --max-old-space-size=4096 src/server.ts --allow-cors",
-    "server2": "node --inspect --max-old-space-size=4096 src/server2.ts --allow-cors",
+    "server1": "node --inspect --max-old-space-size=8192 src/server.ts --allow-cors",
+    "server2": "node --inspect --max-old-space-size=8192 src/server2.ts --allow-cors",
     "start": "concurrently \"npm run server1\" \"npm run server2\"",
     "toc": "doctoc --github --maxlevel 2 README.md",
     "postinstall": "patch-package",
-    "dev1": "nodemon --exec node --inspect --max-old-space-size=4096 --loader ts-node/esm src/server.ts",
-    "dev": "nodemon --exec ts-node --esm --inspect --max-old-space-size=4096 src/server.ts"
+    "dev1": "nodemon --exec node --inspect --max-old-space-size=8192 --loader ts-node/esm src/server.ts",
+    "dev": "nodemon --exec ts-node --esm --inspect --max-old-space-size=8192 src/server.ts"
   },
   "author": "Kossi TSOLEGNAGBO",
   "license": "ISC",

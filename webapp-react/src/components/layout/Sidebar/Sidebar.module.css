@@ -67,7 +67,7 @@
   padding: var(--spacing-3);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
+  color: var(--text-inverse);
   text-decoration: none;
   background: none;
   border: none;
@@ -123,7 +123,7 @@
   gap: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-3);
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--text-inverse);
   text-decoration: none;
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);

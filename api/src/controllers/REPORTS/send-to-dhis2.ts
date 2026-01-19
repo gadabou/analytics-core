@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import axios from 'axios';
 import { ChwsRecoReport, FamilyPlanningReport, HouseholdRecapReport, MorbidityReport, PcimneNewbornReport, PromotionReport, RecoMegSituationReport } from "../../models/reports";
 import { ENV } from "../../providers/constantes";
-import { notEmpty } from "../../functions/functions";
+import { notEmpty } from "../../utils/functions";
 
 const { DHIS2_USER, DHIS2_PASS, DHIS2_HOST, DHIS2_PROTOCOL } = ENV;
 

@@ -17,20 +17,20 @@ export async function TransformRecoVaccinationDashboard(reports: RecoVaccination
         let results: RecoVaccinationDashboard[][] = [];
 
         for (const r of initialData) {
-            const familiesData = (r.children_vaccines?.sort((a, b) => a.family_name.localeCompare(b.family_name, 'fr', { sensitivity: 'base' }))) ?? [];
+            const familiesData = (r.children_vaccines?.sort((a, b) => a.family.name.localeCompare(b.family.name, 'fr', { sensitivity: 'base' }))) ?? [];
             for (const f of familiesData) {
-                if (!(f.family_id in outputMap)) {
-                    outputMap[f.family_id] = {};
+                if (!(f.family.id in outputMap)) {
+                    outputMap[f.family.id] = {};
                 }
-                const childrenData = (f.data?.sort((a, b) => a.child_name.localeCompare(a.child_name, 'fr', { sensitivity: 'base' }))) ?? [];
+                const childrenData = (f.data?.sort((a, b) => a.child.name.localeCompare(a.child.name, 'fr', { sensitivity: 'base' }))) ?? [];
 
                 for (const c of childrenData) {
-                    if (!(c.child_id in outputMap[f.family_id])) {
-                        outputMap[f.family_id][c.child_id] = c;
+                    if (!(c.child.id in outputMap[f.family.id])) {
+                        outputMap[f.family.id][c.child.id] = c;
                     } else {
-                        const len1 = Object.values(outputMap[f.family_id][c.child_id]).filter(v => v === true).length;
+                        const len1 = Object.values(outputMap[f.family.id][c.child.id]).filter(v => v === true).length;
                         const len2 = Object.values(c).filter(v => v === true).length;
-                        if (len2 > len1) outputMap[f.family_id][c.child_id] = c;
+                        if (len2 > len1) outputMap[f.family.id][c.child.id] = c;
                     }
                 }
             }

@@ -4,7 +4,8 @@
      ============================================ */
 
   /* Primary Colors */
-  --primary: #3b82f6;
+  /*--primary: #3b82f6;*/
+  --primary: #003366;
   --primary-hover: #2563eb;
   --primary-active: #1d4ed8;
   --primary-light: #dbeafe;
@@ -39,8 +40,11 @@
   --bg-input: #ffffff;
   --bg-card: #ffffff;
   --bg-overlay: rgba(0, 0, 0, 0.5);
-  --bg-navbar: #1e293b;
+  /*--bg-navbar: #1e293b;
   --bg-sidebar: #ffffff;
+  */
+  --bg-navbar: #004422;
+  --bg-sidebar: #003366;
 
   /* Text Colors */
   --text-primary: #1e293b;
@@ -117,7 +121,7 @@
   /* ============================================
      SHADOWS
      ============================================ */
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);

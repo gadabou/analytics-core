@@ -1,7 +1,7 @@
 
 
 import { Router } from 'express';
-import { Middelware } from "../middleware/auth";
+import { Middelware } from "../middleware/middleware";
 import { SEND_FAMILY_PLANNING_ACTIVITIES_TO_DHIS2, SEND_HOUSEHOLD_ACTIVITIES_TO_DHIS2, SEND_MONTHLY_ACTIVITIES_TO_DHIS2, SEND_MORBIDITY_ACTIVITIES_TO_DHIS2, SEND_PCIMNE_NEWBORN_ACTIVITIES_TO_DHIS2, SEND_PROMOTONAL_ACTIVITIES_TO_DHIS2, SEND_RECO_MEG_SITUATION_ACTIVITIES_TO_DHIS2 } from '../controllers/REPORTS/send-to-dhis2';
 
 const Dhis2Router = Router();

@@ -39,4 +39,3 @@ export type IndexTarget = 'only_id' | 'id' | 'id_reco' | 'reco_month_year' | 're
 export type CouchdbFetchCible = 'medic' | 'users' | 'logs' | 'sentinel' | 'users_meta';
 
 
-

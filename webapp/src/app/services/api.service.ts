@@ -265,8 +265,8 @@ export class ApiService {
     );
   }
 
-  ApiTokenAccessAction(params: { action: string, id?: number, token?: string, isActive?: boolean }): any {
-    const userHttpUrl = `${this.backendUrl}/auth-user/api-access-key`;
+  ApiTokenAccessAction(params: { action: string, id?: number, tokenLen?: string, isActive?: boolean }): any {
+    const userHttpUrl = `${this.backendUrl}/api-token/api-access-key`;
     return from(this.ApiParams({ ...params, userHttpUrl })).pipe(
       switchMap(fparams =>
         this.http.post(userHttpUrl, fparams, this.customHeaders)

@@ -59,8 +59,8 @@ export class RecoVaccinationNotDoneDashboardComponent extends BaseDashboardsComp
     } else {
       for (const dts of this.DATA_FETCHED) {
         for (const dt of dts) {
-          if (notNull(dt.parent_phone)) {
-            const pn = formatGuineaPhone(dt.parent_phone)
+          if (notNull(dt.phone?.parent)) {
+            const pn = formatGuineaPhone(dt.phone?.parent)
             if (!phoneNumbers.includes(pn)) {
               phoneNumbers.push(pn)
             }

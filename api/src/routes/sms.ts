@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { Middelware } from "../middleware/auth";
+import { Middelware } from "../middleware/middleware";
 import { sendCustomSms, sendSms } from '../controllers/sms-sender';
 
 const SmsRouter = Router();

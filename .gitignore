@@ -14,4 +14,7 @@ webapp/test
 webapp/uploads
 webapp/converted_forms
 webapp/venv
+webapp/src/copy
+api/src/copy
 pythons
+
