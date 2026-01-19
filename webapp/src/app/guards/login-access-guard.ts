@@ -36,14 +36,14 @@ export class LoginAccessGuard implements CanActivate, OnDestroy {
 
     const href: string = route.data?.['href'];
 
-    if (user.mustChangeDefaultPassword && !user.hasChangedDefaultPassword) {
+    // if (user.mustChangeDefaultPassword && !user.hasChangedDefaultPassword) {
 
-      if (href != 'auths/change-default-password') {
-        location.href = 'auths/change-default-password';
-        return false;
-      }
+    //   if (href != 'auths/change-default-password') {
+    //     location.href = 'auths/change-default-password';
+    //     return false;
+    //   }
 
-    }
+    // }
 
     const routeAccess: string[] = route.data?.['access'] ?? [];
     const routeTitle: string = route.data?.['title'] || this.constants.APP_TITLE;

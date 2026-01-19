@@ -75,10 +75,11 @@ export class LoginComponent implements OnInit {
 
         this.isLoading = false;
 
-        if (res.mustChangeDefaultPassword) {
-          location.href = 'auths/change-default-password';
-          return;
-        }
+        
+        // if (res.mustChangeDefaultPassword) {
+        //   location.href = 'auths/change-default-password';
+        //   return;
+        // }
 
         console.log(res)
 

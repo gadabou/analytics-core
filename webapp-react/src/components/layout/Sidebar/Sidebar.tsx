@@ -1,0 +1,201 @@
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ChevronRight,
+  BarChart3,
+  FileText,
+  Map,
+  Users,
+  Shield,
+  BookOpen,
+  Gauge,
+  Activity,
+  Calendar,
+  Pill,
+  Baby,
+  Home,
+  Heart,
+  Package,
+} from 'lucide-react';
+import { cn } from '@utils/cn';
+import { collapseVariants, sidebarItemTextVariants } from '@animations';
+import styles from './Sidebar.module.css';
+
+export interface SidebarItem {
+  path: string;
+  label: string;
+  icon: React.ReactNode;
+  children?: SidebarItem[];
+}
+
+export interface SidebarProps {
+  isOpen: boolean;
+  isCollapsed?: boolean;
+  onClose?: () => void;
+}
+
+const sidebarItems: SidebarItem[] = [
+  {
+    path: '/reports',
+    label: 'Rapports',
+    icon: <FileText size={20} />,
+    children: [
+      { path: '/reports/chw-reco-monthly', label: 'Activités RECO', icon: <Activity size={18} /> },
+      { path: '/reports/family-planning', label: 'Planification Familiale', icon: <Calendar size={18} /> },
+      { path: '/reports/morbidity', label: 'Morbidité', icon: <Pill size={18} /> },
+      { path: '/reports/pcimne', label: 'PCIMNE', icon: <Baby size={18} /> },
+      { path: '/reports/promotion', label: 'Promotion', icon: <Heart size={18} /> },
+      { path: '/reports/household-recap', label: 'Récap Ménages', icon: <Home size={18} /> },
+      { path: '/reports/reco-meg-situation', label: 'Situation MEG', icon: <Package size={18} /> },
+    ],
+  },
+  {
+    path: '/dashboards',
+    label: 'Tableaux de bord',
+    icon: <Gauge size={20} />,
+    children: [
+      { path: '/dashboards/monthly', label: 'Mensuel', icon: <BarChart3 size={18} /> },
+      { path: '/dashboards/realtime', label: 'Temps réel', icon: <Activity size={18} /> },
+    ],
+  },
+  { path: '/maps', label: 'Cartes', icon: <Map size={20} /> },
+  {
+    path: '/users',
+    label: 'Utilisateurs',
+    icon: <Users size={20} />,
+    children: [
+      { path: '/users/list', label: 'Liste', icon: <Users size={18} /> },
+      { path: '/users/roles', label: 'Rôles', icon: <Shield size={18} /> },
+    ],
+  },
+  { path: '/administration', label: 'Administration', icon: <Shield size={20} /> },
+  { path: '/documentations', label: 'Documentation', icon: <BookOpen size={20} /> },
+];
+
+export function Sidebar({ isOpen, isCollapsed = false, onClose }: SidebarProps) {
+  const location = useLocation();
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+
+  const toggleExpand = (path: string) => {
+    setExpandedItems((prev) =>
+      prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path]
+    );
+  };
+
+  const isActive = (path: string) => location.pathname.startsWith(path);
+  const isExpanded = (path: string) => expandedItems.includes(path);
+
+  return (
+    <>
+      {/* Overlay for mobile */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className={styles.overlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar */}
+      <motion.aside
+        className={cn(
+          styles.sidebar,
+          isOpen && styles.open,
+          isCollapsed && styles.collapsed
+        )}
+        initial={false}
+        animate={{
+          width: isCollapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
+        }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+      >
+        <nav className={styles.nav}>
+          {sidebarItems.map((item) => (
+            <div key={item.path} className={styles.navGroup}>
+              {item.children ? (
+                <>
+                  <button
+                    type="button"
+                    className={cn(
+                      styles.navItem,
+                      isActive(item.path) && styles.active
+                    )}
+                    onClick={() => toggleExpand(item.path)}
+                  >
+                    <span className={styles.icon}>{item.icon}</span>
+                    <motion.span
+                      className={styles.label}
+                      variants={sidebarItemTextVariants}
+                      animate={isCollapsed ? 'collapsed' : 'expanded'}
+                    >
+                      {item.label}
+                    </motion.span>
+                    {!isCollapsed && (
+                      <ChevronRight
+                        size={16}
+                        className={cn(
+                          styles.chevron,
+                          isExpanded(item.path) && styles.chevronExpanded
+                        )}
+                      />
+                    )}
+                  </button>
+
+                  <AnimatePresence>
+                    {!isCollapsed && isExpanded(item.path) && (
+                      <motion.div
+                        className={styles.subNav}
+                        variants={collapseVariants}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
+                      >
+                        {item.children.map((child) => (
+                          <Link
+                            key={child.path}
+                            to={child.path}
+                            className={cn(
+                              styles.subNavItem,
+                              isActive(child.path) && styles.subNavItemActive
+                            )}
+                            onClick={onClose}
+                          >
+                            <span className={styles.subIcon}>{child.icon}</span>
+                            <span>{child.label}</span>
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              ) : (
+                <Link
+                  to={item.path}
+                  className={cn(
+                    styles.navItem,
+                    isActive(item.path) && styles.active
+                  )}
+                  onClick={onClose}
+                >
+                  <span className={styles.icon}>{item.icon}</span>
+                  <motion.span
+                    className={styles.label}
+                    variants={sidebarItemTextVariants}
+                    animate={isCollapsed ? 'collapsed' : 'expanded'}
+                  >
+                    {item.label}
+                  </motion.span>
+                </Link>
+              )}
+            </div>
+          ))}
+        </nav>
+      </motion.aside>
+    </>
+  );
+}

@@ -112,7 +112,7 @@ export class AuthUserController {
                 role.name = name;
                 role.routes = routes;
                 role.authorizations = authorizations;
-                return role;
+                return  role; 
             });
 
             await roleRepo.save(roles);

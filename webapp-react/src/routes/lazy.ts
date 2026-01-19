@@ -1,0 +1,33 @@
+import { lazy } from 'react';
+
+// Auth pages
+export const LoginPage = lazy(() => import('@features/auth/pages/LoginPage'));
+export const ChangePasswordPage = lazy(() => import('@features/auth/pages/ChangePasswordPage'));
+
+// Reports pages
+export const ReportsPage = lazy(() => import('@features/reports/pages/ReportsPage'));
+
+// Dashboard pages
+export const MonthlyDashboardPage = lazy(() => import('@features/dashboards/pages/monthly/MonthlyDashboard'));
+export const RealtimeDashboardPage = lazy(() => import('@features/dashboards/pages/realtime/RealtimeDashboard'));
+
+// Maps page
+export const MapsPage = lazy(() => import('@features/maps/pages/MapsPage'));
+
+// Users pages
+export const UsersPage = lazy(() => import('@features/users/pages/UsersPage'));
+export const RolesPage = lazy(() => import('@features/users/pages/RolesPage'));
+
+// Admin pages
+export const AdminPage = lazy(() => import('@features/admin/pages/AdminPage'));
+
+// Managements page
+export const ManagementsPage = lazy(() => import('@features/managements/pages/ManagementsPage'));
+
+// Documentation page
+export const DocumentationPage = lazy(() => import('@features/documentation/pages/DocumentationPage'));
+
+// Error pages
+export const NotFoundPage = lazy(() => import('@features/errors/pages/NotFoundPage'));
+export const ServerErrorPage = lazy(() => import('@features/errors/pages/ServerErrorPage'));
+export const UnauthorizedPage = lazy(() => import('@features/errors/pages/UnauthorizedPage'));

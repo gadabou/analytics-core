@@ -145,30 +145,30 @@ export class UpdateServiceWorkerService {
   }
 
   async watchForChanges() {
-    const user = await this.userCtx.currentUser();
-    if (user?.id) {
-      this.api.appVersion().subscribe((newVersion: { service_worker_version: number | null, app_version: string | null }) => {
-        if (newVersion) {
-          const oldVersionsStr = this.store.get({ db: 'local', name: '_versions' });
-          if (oldVersionsStr) {
-            const oldVersions = JSON.parse(oldVersionsStr) as { service_worker_version: number | null, app_version: string | null };
-            if (newVersion.service_worker_version && `${oldVersions.service_worker_version}` != `${newVersion.service_worker_version}`) {
-              this.appNewVersion = newVersion;
-              this.modalService.open(ReloadingComponent).subscribe((result) => {
-                if (result) {
-                  console.log("Données reçues depuis la modal :", result);
-                }
-              });
-            }
-          } else {
-            return this.store.set({ db: 'local', name: '_versions', value: JSON.stringify(newVersion) });
-          }
-        }
-        setTimeout(() => this.ngZone.run(() => this.watchForChanges()), this.UPDATE_INTERVAL ?? this.SIXTY_SECOND);
-      }, (err: any) => {
-        console.log(err.toString());
-        setTimeout(() => this.ngZone.run(() => this.watchForChanges()), this.UPDATE_INTERVAL ?? this.SIXTY_SECOND);
-      });
-    }
+    // const user = await this.userCtx.currentUser();
+    // if (user?.id) {
+    //   this.api.appVersion().subscribe((newVersion: { service_worker_version: number | null, app_version: string | null }) => {
+    //     if (newVersion) {
+    //       const oldVersionsStr = this.store.get({ db: 'local', name: '_versions' });
+    //       if (oldVersionsStr) {
+    //         const oldVersions = JSON.parse(oldVersionsStr) as { service_worker_version: number | null, app_version: string | null };
+    //         if (newVersion.service_worker_version && `${oldVersions.service_worker_version}` != `${newVersion.service_worker_version}`) {
+    //           this.appNewVersion = newVersion;
+    //           this.modalService.open(ReloadingComponent).subscribe((result) => {
+    //             if (result) {
+    //               console.log("Données reçues depuis la modal :", result);
+    //             }
+    //           });
+    //         }
+    //       } else {
+    //         return this.store.set({ db: 'local', name: '_versions', value: JSON.stringify(newVersion) });
+    //       }
+    //     }
+    //     setTimeout(() => this.ngZone.run(() => this.watchForChanges()), this.UPDATE_INTERVAL ?? this.SIXTY_SECOND);
+    //   }, (err: any) => {
+    //     console.log(err.toString());
+    //     setTimeout(() => this.ngZone.run(() => this.watchForChanges()), this.UPDATE_INTERVAL ?? this.SIXTY_SECOND);
+    //   });
+    // }
   }
 }

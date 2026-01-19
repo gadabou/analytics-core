@@ -81,8 +81,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS dashboards_reco_vaccination_not_done_view
                                         'vaccine_VAA', v.vaccine_VAA,
                                         'vaccine_VPI_2', v.vaccine_VPI_2,
                                         'vaccine_MEN_A', v.vaccine_MEN_A,
-                                        'vaccine_VAR_2', v.vaccine_VAR_2,
-
+                                        'vaccine_VAR_2', v.vaccine_VAR_2
+                                    ) || jsonb_build_object(
                                         'vaccine_BCG_date', v.vaccine_BCG_date,
                                         'vaccine_VPO_0_date', v.vaccine_VPO_0_date,
                                         'vaccine_PENTA_1_date', v.vaccine_PENTA_1_date,

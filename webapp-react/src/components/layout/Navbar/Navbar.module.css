@@ -1,0 +1,315 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--navbar-height);
+  background-color: var(--bg-navbar);
+  z-index: var(--z-fixed);
+  box-shadow: var(--shadow-md);
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 var(--spacing-4);
+  max-width: 100%;
+}
+
+/* Left Section */
+.left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.menuButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-inverse);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.menuButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  text-decoration: none;
+}
+
+.brandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: var(--primary);
+  color: white;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  border-radius: var(--radius-md);
+}
+
+.brandText {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-inverse);
+}
+
+/* Navigation */
+.nav {
+  display: none;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+@media (min-width: 1024px) {
+  .nav {
+    display: flex;
+  }
+}
+
+.navItemWrapper {
+  position: relative;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.navItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-inverse);
+}
+
+.navItemActive {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-inverse);
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  margin-top: var(--spacing-1);
+  padding: var(--spacing-2);
+  background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.dropdownItem:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.dropdownItemActive {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+/* Right Section */
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.iconButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-inverse);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.iconButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  background-color: var(--danger);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* User Menu */
+.userMenuWrapper {
+  position: relative;
+}
+
+.userButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2);
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: var(--radius-lg);
+  color: var(--text-inverse);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.userButton:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: var(--primary);
+  border-radius: var(--radius-full);
+}
+
+.userInfo {
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+@media (min-width: 768px) {
+  .userInfo {
+    display: flex;
+  }
+}
+
+.userName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+}
+
+.userRole {
+  font-size: var(--font-size-xs);
+  opacity: 0.8;
+  line-height: 1.2;
+}
+
+.chevron {
+  transition: transform var(--transition-fast);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* User Dropdown Menu */
+.userMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 200px;
+  margin-top: var(--spacing-2);
+  padding: var(--spacing-2);
+  background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+}
+
+.userMenuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  text-decoration: none;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.userMenuItem:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.logoutItem {
+  color: var(--danger);
+}
+
+.logoutItem:hover {
+  background-color: var(--danger-light);
+}
+
+.userMenuDivider {
+  height: 1px;
+  margin: var(--spacing-2) 0;
+  background-color: var(--border-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .brandText {
+    display: none;
+  }
+
+  .chevron {
+    display: none;
+  }
+}
