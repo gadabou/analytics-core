@@ -2,6 +2,28 @@ import { axiosInstance } from './axios.instance';
 import type { PaginatedResponse, PaginationParams } from '@/types';
 
 // ============================================
+// MODE MOCK - Utiliser les données de test locales
+// Mettre USE_MOCK_API à false pour utiliser le vrai backend
+// ============================================
+const USE_MOCK_API = true;
+
+// Import conditionnel des APIs Mock
+import {
+  AuthApiMock,
+  ReportsApiMock,
+  DashboardsApiMock,
+  MapsApiMock,
+  OrgUnitsApiMock,
+  DatabaseApiMock,
+  Dhis2ApiMock,
+  SmsApiMock,
+  ConfigApiMock,
+  MigrationsApiMock,
+  SurveyApiMock,
+  AdminApiMock,
+} from './api.mock.service';
+
+// ============================================
 // GENERIC API SERVICE CLASS
 // ============================================
 class ApiService {
@@ -108,9 +130,9 @@ interface ApiResponse<T = unknown> {
 }
 
 // ============================================
-// AUTH API
+// AUTH API (Version réelle - backend)
 // ============================================
-export const AuthApi = {
+const _RealAuthApi = {
   login: async (credentials: { username: string; password: string }) => {
     const response = await axiosInstance.post<ApiResponse>('/auth-user/login', {
       credential: credentials.username,
@@ -192,9 +214,9 @@ export const AuthApi = {
 };
 
 // ============================================
-// REPORTS API
+// REPORTS API (Version réelle - backend)
 // ============================================
-export const ReportsApi = {
+const _RealReportsApi = {
   getPromotionReports: async (params: { months: string[]; year: number; recos: string[]; sync?: boolean }) => {
     const response = await axiosInstance.post<ApiResponse>('/reports/promotion-reports', withUserId({ ...params, sync: params.sync ?? false }));
     return response.data;
@@ -303,9 +325,9 @@ export const ReportsApi = {
 };
 
 // ============================================
-// DASHBOARDS API
+// DASHBOARDS API (Version réelle - backend)
 // ============================================
-export const DashboardsApi = {
+const _RealDashboardsApi = {
   getRecoVaccinationNotDone: async (params: { months: string[]; year: number; recos: string[]; sync?: boolean }) => {
     const response = await axiosInstance.post<ApiResponse>('/dashboards/reco-vaccination-not-done-dashboards', withUserId({ ...params, sync: params.sync ?? false }));
     return response.data;
@@ -338,9 +360,9 @@ export const DashboardsApi = {
 };
 
 // ============================================
-// MAPS API
+// MAPS API (Version réelle - backend)
 // ============================================
-export const MapsApi = {
+const _RealMapsApi = {
   getRecoDataMaps: async (params: { months: string[]; year: number; recos: string[]; sync?: boolean }) => {
     const response = await axiosInstance.post<ApiResponse>('/maps/reco-data-maps', withUserId({ ...params, sync: params.sync ?? false }));
     return response.data;
@@ -348,9 +370,9 @@ export const MapsApi = {
 };
 
 // ============================================
-// ORG UNITS API
+// ORG UNITS API (Version réelle - backend)
 // ============================================
-export const OrgUnitsApi = {
+const _RealOrgUnitsApi = {
   getCountries: async (params?: Record<string, unknown>) => {
     const response = await axiosInstance.post<ApiResponse>('/org-units/countries', withUserId(params || {}));
     return response.data;
@@ -408,9 +430,9 @@ export const OrgUnitsApi = {
 };
 
 // ============================================
-// DATABASE API
+// DATABASE API (Version réelle - backend)
 // ============================================
-export const DatabaseApi = {
+const _RealDatabaseApi = {
   getDataToDeleteFromCouchDb: async (params: { cible: string[]; start_date: string; end_date: string; type: string }) => {
     const response = await axiosInstance.post<ApiResponse>('/database/couchdb/list-data-to-delete', withUserId(params));
     return response.data;
@@ -438,7 +460,7 @@ export const DatabaseApi = {
 };
 
 // ============================================
-// DHIS2 API
+// DHIS2 API (Version réelle - backend)
 // ============================================
 interface Dhis2Params {
   username: string;
@@ -451,7 +473,7 @@ interface Dhis2Params {
   orgunit: string;
 }
 
-export const Dhis2Api = {
+const _RealDhis2Api = {
   sendChwsRecoReports: async (params: Dhis2Params) => {
     const response = await axiosInstance.post<ApiResponse>('/dhis2/send/monthly-activity', withUserId(params));
     return response.data;
@@ -489,9 +511,9 @@ export const Dhis2Api = {
 };
 
 // ============================================
-// SMS API
+// SMS API (Version réelle - backend)
 // ============================================
-export const SmsApi = {
+const _RealSmsApi = {
   sendSms: async (params: { phoneNumbers: string[]; message: string }) => {
     const response = await axiosInstance.post<ApiResponse>('/sms/send-sms', withUserId(params));
     return response.data;
@@ -504,9 +526,9 @@ export const SmsApi = {
 };
 
 // ============================================
-// CONFIG API
+// CONFIG API (Version réelle - backend)
 // ============================================
-export const ConfigApi = {
+const _RealConfigApi = {
   getConfigs: async () => {
     const response = await axiosInstance.post<ApiResponse>('/configs', withUserId({ noLogData: true }));
     return response.data;
@@ -519,9 +541,9 @@ export const ConfigApi = {
 };
 
 // ============================================
-// SQL MIGRATIONS API
+// SQL MIGRATIONS API (Version réelle - backend)
 // ============================================
-export const MigrationsApi = {
+const _RealMigrationsApi = {
   getAllMigrations: async () => {
     const response = await axiosInstance.post<ApiResponse>('/sql/getall', withUserId({}));
     return response.data;
@@ -544,9 +566,9 @@ export const MigrationsApi = {
 };
 
 // ============================================
-// SURVEY API
+// SURVEY API (Version réelle - backend)
 // ============================================
-export const SurveyApi = {
+const _RealSurveyApi = {
   saveSurvey: async (survey: unknown) => {
     const response = await axiosInstance.post<ApiResponse>('/survey/save', { survey, userId: null });
     return response.data;
@@ -559,9 +581,9 @@ export const SurveyApi = {
 };
 
 // ============================================
-// ADMIN API
+// ADMIN API (Version réelle - backend)
 // ============================================
-export const AdminApi = {
+const _RealAdminApi = {
   // API Token Management
   getApiTokens: async () => {
     const response = await axiosInstance.post<ApiResponse>('/auth-user/api-access-key', withUserId({ action: 'list' }));
@@ -640,8 +662,23 @@ export const AdminApi = {
 };
 
 // ============================================
-// EXPORT ALL APIs
+// EXPORT ALL APIs - Utilise Mock si activé
 // ============================================
+
+// Export des APIs conditionnelles (mock ou réel)
+export const AuthApi = USE_MOCK_API ? AuthApiMock : _RealAuthApi;
+export const ReportsApi = USE_MOCK_API ? ReportsApiMock : _RealReportsApi;
+export const DashboardsApi = USE_MOCK_API ? DashboardsApiMock : _RealDashboardsApi;
+export const MapsApi = USE_MOCK_API ? MapsApiMock : _RealMapsApi;
+export const OrgUnitsApi = USE_MOCK_API ? OrgUnitsApiMock : _RealOrgUnitsApi;
+export const DatabaseApi = USE_MOCK_API ? DatabaseApiMock : _RealDatabaseApi;
+export const Dhis2Api = USE_MOCK_API ? Dhis2ApiMock : _RealDhis2Api;
+export const SmsApi = USE_MOCK_API ? SmsApiMock : _RealSmsApi;
+export const ConfigApi = USE_MOCK_API ? ConfigApiMock : _RealConfigApi;
+export const MigrationsApi = USE_MOCK_API ? MigrationsApiMock : _RealMigrationsApi;
+export const SurveyApi = USE_MOCK_API ? SurveyApiMock : _RealSurveyApi;
+export const AdminApi = USE_MOCK_API ? AdminApiMock : _RealAdminApi;
+
 export const Api = {
   auth: AuthApi,
   reports: ReportsApi,

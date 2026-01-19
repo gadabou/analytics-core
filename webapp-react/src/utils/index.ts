@@ -1,4 +1,6 @@
 export { cn } from './cn';
+export { Database, DatabaseError } from './Database';
+export type { QueryOptions } from './Database';
 
 export {
   formatDate,
