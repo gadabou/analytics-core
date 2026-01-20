@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { OrgUnitsApi } from '@/services/api/api.service';
 import type {
   CountryMap,
@@ -222,6 +222,10 @@ export function OrgUnitsFilter({
     loadRecos();
   }, [selectedVillageSecteurs, showRecoLevel]);
 
+  // Utiliser useRef pour éviter la boucle infinie causée par onChange non mémoïsé
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
   // Notify parent of selection changes
   const notifyChange = useCallback(() => {
     const selection: OrgUnitSelection = {
@@ -243,7 +247,7 @@ export function OrgUnitsFilter({
       recoIds = recos.map(r => r.id);
     }
 
-    onChange(selection, recoIds);
+    onChangeRef.current(selection, recoIds);
   }, [
     selectedCountries,
     selectedRegions,
@@ -254,7 +258,6 @@ export function OrgUnitsFilter({
     selectedVillageSecteurs,
     selectedRecos,
     recos,
-    onChange,
   ]);
 
   useEffect(() => {

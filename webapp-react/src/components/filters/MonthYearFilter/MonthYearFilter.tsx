@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MONTHS, getCurrentYear, getYears } from '@/types';
 import styles from './MonthYearFilter.module.css';
 
@@ -27,9 +27,13 @@ export function MonthYearFilter({
 
   const years = getYears(2020);
 
+  // Utiliser useRef pour éviter la boucle infinie causée par onChange non mémoïsé
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
   useEffect(() => {
-    onChange(selectedMonth, selectedYear);
-  }, [selectedMonth, selectedYear, onChange]);
+    onChangeRef.current(selectedMonth, selectedYear);
+  }, [selectedMonth, selectedYear]);
 
   return (
     <div className={`${styles.container} ${className}`}>
