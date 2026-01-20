@@ -9,15 +9,15 @@ import {
   Building2,
   Eye,
   EyeOff,
-  Maximize
+  Maximize,
+  MoreHorizontal,
+  X
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-import { PageWrapper } from '@components/layout';
-import { Card, CardBody } from '@components/ui';
 import { Button } from '@components/ui/Button/Button';
 import { Modal } from '@components/ui/Modal/Modal';
 import { useNotification } from '@/hooks/useNotification';
@@ -95,8 +95,27 @@ export default function MapsPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isLayerModalOpen, setIsLayerModalOpen] = useState(false);
   const [filters, setFilters] = useState<DashboardFilterParams | null>(null);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   const { showSuccess, showError, showWarning } = useNotification();
+
+  // Close more menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setIsMoreMenuOpen(false);
+      }
+    };
+
+    if (isMoreMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMoreMenuOpen]);
 
   // Initialize map
   useEffect(() => {
@@ -367,92 +386,116 @@ export default function MapsPage() {
   };
 
   return (
-    <PageWrapper
-      title="Cartes"
-      subtitle="Visualisation géographique des activités RECO"
-    >
-      {/* Controls Bar */}
-      <div className={styles.controlsBar}>
-        <div className={styles.controlsLeft}>
-          <Button variant="primary" onClick={() => setIsFilterModalOpen(true)}>
+    <div className={styles.pageContainer}>
+      {/* Compact Header */}
+      <div className={styles.header}>
+        <div className={styles.headerTitle}>
+          <h1>Cartes</h1>
+          <span className={styles.headerSubtitle}>Visualisation géographique des activités RECO</span>
+        </div>
+      </div>
+
+      {/* Full Screen Map Container */}
+      <div className={styles.mapWrapper}>
+        {/* Map */}
+        <div ref={mapRef} className={styles.map} />
+
+        {/* Loading Overlay */}
+        {isLoading && (
+          <div className={styles.mapOverlay}>
+            <RefreshCw size={32} className="animate-spin" />
+            <span>Chargement...</span>
+          </div>
+        )}
+
+        {/* Top Controls - Filter and More */}
+        <div className={styles.topControls}>
+          <Button variant="primary" size="sm" onClick={() => setIsFilterModalOpen(true)}>
             <Filter size={16} />
             Filtrer
           </Button>
-          <Button variant="outline" onClick={() => setIsLayerModalOpen(true)}>
-            <Layers size={16} />
-            Couches
-          </Button>
-        </div>
-        <div className={styles.controlsRight}>
-          <Button
-            variant={showRecoMarkers ? 'primary' : 'outline'}
-            size="sm"
-            onClick={() => setShowRecoMarkers(!showRecoMarkers)}
-            title={showRecoMarkers ? 'Masquer les RECO' : 'Afficher les RECO'}
-          >
-            {showRecoMarkers ? <Eye size={16} /> : <EyeOff size={16} />}
-            <Users size={16} />
-          </Button>
-          <Button
-            variant={showHealthCenters ? 'primary' : 'outline'}
-            size="sm"
-            onClick={() => setShowHealthCenters(!showHealthCenters)}
-            title={showHealthCenters ? 'Masquer les CS' : 'Afficher les CS'}
-          >
-            {showHealthCenters ? <Eye size={16} /> : <EyeOff size={16} />}
-            <Building2 size={16} />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handleCenterOnUser} title="Ma position">
-            <Navigation size={16} />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handleZoomToFit} title="Ajuster la vue">
-            <Maximize size={16} />
-          </Button>
-        </div>
-      </div>
 
-      {/* Stats */}
-      <div className={styles.statsBar}>
-        <div className={styles.stat}>
-          <MapPin size={16} />
-          <span>{stats.withCoords} avec coordonnées</span>
-        </div>
-        <div className={styles.stat}>
-          <span>{stats.withoutCoords} sans coordonnées</span>
-        </div>
-        <div className={styles.stat}>
-          <span><strong>Total:</strong> {stats.total}</span>
-        </div>
-      </div>
+          {/* More Menu */}
+          <div className={styles.moreMenuWrapper} ref={moreMenuRef}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
+              className={styles.moreButton}
+            >
+              {isMoreMenuOpen ? <X size={16} /> : <MoreHorizontal size={16} />}
+              Plus
+            </Button>
 
-      {/* Map Container */}
-      <Card className={styles.mapCard}>
-        <CardBody style={{ padding: 0 }}>
-          <div className={styles.mapContainer}>
-            <div ref={mapRef} className={styles.map} />
-            {isLoading && (
-              <div className={styles.mapOverlay}>
-                <RefreshCw size={32} className="animate-spin" />
-                <span>Chargement...</span>
+            {isMoreMenuOpen && (
+              <div className={styles.moreMenu}>
+                <button
+                  className={styles.moreMenuItem}
+                  onClick={() => {
+                    setIsLayerModalOpen(true);
+                    setIsMoreMenuOpen(false);
+                  }}
+                >
+                  <Layers size={16} />
+                  <span>Couches</span>
+                </button>
+                <button
+                  className={`${styles.moreMenuItem} ${showRecoMarkers ? styles.active : ''}`}
+                  onClick={() => setShowRecoMarkers(!showRecoMarkers)}
+                >
+                  {showRecoMarkers ? <Eye size={16} /> : <EyeOff size={16} />}
+                  <Users size={16} />
+                  <span>RECO</span>
+                </button>
+                <button
+                  className={`${styles.moreMenuItem} ${showHealthCenters ? styles.active : ''}`}
+                  onClick={() => setShowHealthCenters(!showHealthCenters)}
+                >
+                  {showHealthCenters ? <Eye size={16} /> : <EyeOff size={16} />}
+                  <Building2 size={16} />
+                  <span>Centres</span>
+                </button>
+                <button className={styles.moreMenuItem} onClick={handleCenterOnUser}>
+                  <Navigation size={16} />
+                  <span>Ma position</span>
+                </button>
+                <button className={styles.moreMenuItem} onClick={handleZoomToFit}>
+                  <Maximize size={16} />
+                  <span>Ajuster vue</span>
+                </button>
               </div>
             )}
           </div>
-        </CardBody>
-      </Card>
+        </div>
 
-      {/* Legend */}
-      <div className={styles.legend}>
-        <div className={styles.legendItem}>
-          <div className={styles.legendMarker} style={{ background: '#f59e0b' }}></div>
-          <span>Activités RECO</span>
-        </div>
-        <div className={styles.legendItem}>
-          <div className={styles.legendMarker} style={{ background: '#22c55e', borderRadius: '4px' }}></div>
-          <span>Centres de santé</span>
-        </div>
-        <div className={styles.legendItem}>
-          <div className={styles.legendMarker} style={{ background: '#3b82f6' }}></div>
-          <span>Votre position</span>
+        {/* Bottom Info Panel - Stats & Legend */}
+        <div className={styles.bottomPanel}>
+          <div className={styles.statsSection}>
+            <div className={styles.statItem}>
+              <MapPin size={14} />
+              <span>{stats.withCoords} avec coordonnées</span>
+            </div>
+            <div className={styles.statItem}>
+              <span>{stats.withoutCoords} sans coordonnées</span>
+            </div>
+            <div className={styles.statItem}>
+              <strong>Total:</strong> {stats.total}
+            </div>
+          </div>
+          <div className={styles.legendSection}>
+            <div className={styles.legendItem}>
+              <div className={styles.legendMarker} style={{ background: '#f59e0b' }}></div>
+              <span>Activités RECO</span>
+            </div>
+            <div className={styles.legendItem}>
+              <div className={styles.legendMarker} style={{ background: '#22c55e', borderRadius: '4px' }}></div>
+              <span>Centres de santé</span>
+            </div>
+            <div className={styles.legendItem}>
+              <div className={styles.legendMarker} style={{ background: '#3b82f6' }}></div>
+              <span>Votre position</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -496,6 +539,6 @@ export default function MapsPage() {
           ))}
         </div>
       </Modal>
-    </PageWrapper>
+    </div>
   );
 }
