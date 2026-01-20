@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu,
@@ -16,6 +16,9 @@ import {
   Shield,
   BookOpen,
   Gauge,
+  Grid3X3,
+  Search,
+  Mail,
 } from 'lucide-react';
 import { cn } from '@utils/cn';
 import { dropdownVariants } from '@animations';
@@ -53,6 +56,17 @@ const defaultNavItems: NavItem[] = [
   { path: '/documentations', label: 'Documentation', icon: <BookOpen size={18} /> },
 ];
 
+// Menu items for the DHIS2-style app menu grid
+const appMenuItems: NavItem[] = [
+  { path: '/reports', label: 'Rapports', icon: <BarChart3 size={28} /> },
+  { path: '/dashboards/monthly', label: 'Dashboards Mensuels', icon: <Gauge size={28} /> },
+  { path: '/dashboards/realtime', label: 'Dashboards Dynamique', icon: <BarChart3 size={28} /> },
+  { path: '/maps', label: 'Geolocalisation (Maps)', icon: <Map size={28} /> },
+  { path: '/users', label: 'Utilisateurs', icon: <Users size={28} /> },
+  { path: '/documentations', label: 'Documentations', icon: <BookOpen size={28} /> },
+  { path: '/administration', label: 'Administration', icon: <Shield size={28} /> },
+];
+
 export function Navbar({
   onMenuClick,
   isMenuOpen = false,
@@ -61,10 +75,44 @@ export function Navbar({
   onLogout,
 }: NavbarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [appMenuOpen, setAppMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const appMenuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (path: string) => location.pathname.startsWith(path);
+
+  // Filter app menu items based on search query
+  const filteredAppMenuItems = appMenuItems.filter((item) =>
+    item.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Close app menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (appMenuRef.current && !appMenuRef.current.contains(event.target as Node)) {
+        setAppMenuOpen(false);
+        setSearchQuery('');
+      }
+    };
+
+    if (appMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [appMenuOpen]);
+
+  // Handle app menu item click
+  const handleAppMenuItemClick = (path: string) => {
+    setAppMenuOpen(false);
+    setSearchQuery('');
+    navigate(path);
+  };
 
   return (
     <header className={styles.navbar}>
@@ -140,11 +188,75 @@ export function Navbar({
 
         {/* Right Section */}
         <div className={styles.right}>
+          {/* Mail */}
+          <button type="button" className={styles.iconButton} aria-label="Messages">
+            <Mail size={20} />
+          </button>
+
           {/* Notifications */}
           <button type="button" className={styles.iconButton} aria-label="Notifications">
             <Bell size={20} />
             <span className={styles.badge}>3</span>
           </button>
+
+          {/* App Menu Toggle - DHIS2 Style */}
+          <div className={styles.appMenuWrapper} ref={appMenuRef}>
+            <button
+              type="button"
+              className={styles.iconButton}
+              onClick={() => setAppMenuOpen(!appMenuOpen)}
+              aria-label="Menu des applications"
+              aria-expanded={appMenuOpen}
+            >
+              <Menu size={20} />
+            </button>
+
+            {/* App Menu Popup - DHIS2 Style */}
+            <AnimatePresence>
+              {appMenuOpen && (
+                <motion.div
+                  className={styles.appMenu}
+                  variants={dropdownVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                  {/* Search Input */}
+                  <div className={styles.appMenuSearch}>
+                    <Search size={16} className={styles.searchIcon} />
+                    <input
+                      type="text"
+                      placeholder="Rechercher..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className={styles.searchInput}
+                      autoFocus
+                    />
+                  </div>
+
+                  {/* Menu Grid */}
+                  <div className={styles.appMenuGrid}>
+                    {filteredAppMenuItems.map((item) => (
+                      <button
+                        key={item.path}
+                        type="button"
+                        className={styles.appMenuItem}
+                        onClick={() => handleAppMenuItemClick(item.path)}
+                      >
+                        <span className={styles.appMenuItemIcon}>{item.icon}</span>
+                        <span className={styles.appMenuItemLabel}>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* No Results */}
+                  {filteredAppMenuItems.length === 0 && (
+                    <div className={styles.noResults}>Aucun élément trouvé</div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* User Menu */}
           <div className={styles.userMenuWrapper}>

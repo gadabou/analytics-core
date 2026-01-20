@@ -24,17 +24,12 @@
   overflow-y: auto;
   overflow-x: hidden;
   transition: transform var(--transition-normal);
+  transform: translateX(-100%);
 }
 
-/* Mobile: Hidden by default */
-@media (max-width: 1024px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
+/* Show sidebar when open */
+.sidebar.open {
+  transform: translateX(0);
 }
 
 /* Collapsed state */

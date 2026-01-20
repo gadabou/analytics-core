@@ -56,7 +56,7 @@ function AppContent() {
       <main
         className={
           isAuthenticated
-            ? `main-content with-sidebar ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`
+            ? `main-content ${sidebarOpen ? 'with-sidebar' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`
             : ''
         }
       >
