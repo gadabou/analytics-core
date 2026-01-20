@@ -136,8 +136,8 @@
   /* ============================================
      LAYOUT
      ============================================ */
-  --navbar-height: 64px;
-  --sidebar-width: 260px;
+  --navbar-height: 60px;
+  --sidebar-width: 250px;
   --sidebar-collapsed-width: 72px;
   --footer-height: 56px;
   --content-max-width: 1400px;
@@ -186,8 +186,8 @@
 /* Tablet */
 @media (max-width: 1024px) {
   :root {
-    --navbar-height: 60px;
-    --sidebar-width: 240px;
+    --navbar-height: 50px;
+    --sidebar-width: 230px;
     --font-size-base: 0.9375rem;
     --spacing-6: 1.25rem;
     --spacing-8: 1.75rem;
@@ -197,7 +197,7 @@
 /* Mobile */
 @media (max-width: 768px) {
   :root {
-    --navbar-height: 56px;
+    --navbar-height: 46px;
     --sidebar-width: 100%;
     --font-size-base: 1rem;
     --radius-input: 10px;
@@ -211,7 +211,7 @@
 /* Small Mobile */
 @media (max-width: 480px) {
   :root {
-    --navbar-height: 52px;
+    --navbar-height: 42px;
     --font-size-4xl: 1.75rem;
     --font-size-3xl: 1.5rem;
     --font-size-2xl: 1.25rem;
