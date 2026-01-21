@@ -277,7 +277,7 @@ ol {
 .main-content {
   flex: 1;
   margin-top: var(--navbar-height);
-  padding: var(--spacing-6);
+  padding: var(--spacing-0);
   transition: margin-left var(--transition-normal);
 }
 

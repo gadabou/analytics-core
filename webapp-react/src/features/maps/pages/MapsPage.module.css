@@ -6,35 +6,6 @@
   overflow: hidden;
 }
 
-/* Compact Header */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  background: red /*var(--bg-card)*/;
-  border-bottom: 1px solid var(--border-color);
-  flex-shrink: 0;
-}
-
-.headerTitle {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.headerTitle h1 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.headerSubtitle {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
 /* Map Wrapper - Full screen */
 .mapWrapper {
   position: relative;
@@ -217,23 +188,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .header {
-    padding: 6px 12px;
-  }
-
-  .headerTitle {
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .headerTitle h1 {
-    font-size: 1rem;
-  }
-
-  .headerSubtitle {
-    font-size: 0.75rem;
-  }
-
   .topControls {
     top: 8px;
     left: 8px;

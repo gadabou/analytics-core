@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants } from '@animations';
 import { cn } from '@utils/cn';
+import { PageHeader } from '../PageHeader';
 import styles from './PageWrapper.module.css';
 
 export interface PageWrapperProps {
@@ -37,18 +38,7 @@ export function PageWrapper({
       exit="exit"
     >
       {(title || actions) && (
-        <motion.div
-          className={styles.header}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.3 }}
-        >
-          <div className={styles.titleSection}>
-            {title && <h1 className={styles.title}>{title}</h1>}
-            {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-          </div>
-          {actions && <div className={styles.actions}>{actions}</div>}
-        </motion.div>
+        <PageHeader title={title || ''} subtitle={subtitle} actions={actions} />
       )}
 
       <motion.div

@@ -18,6 +18,7 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import { PageHeader } from '@components/layout';
 import { Button } from '@components/ui/Button/Button';
 import { Modal } from '@components/ui/Modal/Modal';
 import { useNotification } from '@/hooks/useNotification';
@@ -388,12 +389,10 @@ export default function MapsPage() {
   return (
     <div className={styles.pageContainer}>
       {/* Compact Header */}
-      <div className={styles.header}>
-        <div className={styles.headerTitle}>
-          <h1>Cartes</h1>
-          <span className={styles.headerSubtitle}>Visualisation géographique des activités RECO</span>
-        </div>
-      </div>
+      <PageHeader
+        title="Cartes"
+        subtitle="Visualisation géographique des activités RECO"
+      />
 
       {/* Full Screen Map Container */}
       <div className={styles.mapWrapper}>
