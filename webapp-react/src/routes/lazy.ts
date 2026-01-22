@@ -27,6 +27,9 @@ export const ManagementsPage = lazy(() => import('@features/managements/pages/Ma
 // Documentation page
 export const DocumentationPage = lazy(() => import('@features/documentation/pages/DocumentationPage'));
 
+// Settings page
+export const SettingsPage = lazy(() => import('@features/settings/pages/SettingsPage'));
+
 // Error pages
 export const NotFoundPage = lazy(() => import('@features/errors/pages/NotFoundPage'));
 export const ServerErrorPage = lazy(() => import('@features/errors/pages/ServerErrorPage'));

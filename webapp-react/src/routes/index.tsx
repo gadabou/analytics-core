@@ -121,6 +121,16 @@ export function AppRoutes() {
           {/* Documentation route (public) */}
           <Route path="/documentations/*" element={<Pages.DocumentationPage />} />
 
+          {/* Settings route (private) */}
+          <Route
+            path="/settings"
+            element={
+              <PrivateRoute>
+                <Pages.SettingsPage />
+              </PrivateRoute>
+            }
+          />
+
           {/* Error pages */}
           <Route path="/errors/401" element={<Pages.UnauthorizedPage />} />
           <Route path="/errors/500" element={<Pages.ServerErrorPage />} />
