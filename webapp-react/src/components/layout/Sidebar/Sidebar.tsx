@@ -17,6 +17,9 @@ import {
   Home,
   Heart,
   Package,
+  User,
+  Settings,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@utils/cn';
 import { collapseVariants, sidebarItemTextVariants } from '@animations';
@@ -27,15 +30,30 @@ export interface SidebarItem {
   label: string;
   icon: React.ReactNode;
   children?: SidebarItem[];
+  onClick?: () => void;
+  isButton?: boolean;
+  className?: string;
 }
 
 export interface SidebarProps {
   isOpen: boolean;
   isCollapsed?: boolean;
   onClose?: () => void;
+  userName?: string;
+  userRole?: string;
+  onLogout?: () => void;
 }
 
 const sidebarItems: SidebarItem[] = [
+  {
+    path: '/dashboards',
+    label: 'Tableaux de bord',
+    icon: <Gauge size={20} />,
+    children: [
+      { path: '/dashboards/monthly', label: 'Mensuel', icon: <BarChart3 size={18} /> },
+      { path: '/dashboards/realtime', label: 'Temps réel', icon: <Activity size={18} /> },
+    ],
+  },
   {
     path: '/reports',
     label: 'Rapports',
@@ -48,15 +66,6 @@ const sidebarItems: SidebarItem[] = [
       { path: '/reports/promotion', label: 'Promotion', icon: <Heart size={18} /> },
       { path: '/reports/household-recap', label: 'Récap Ménages', icon: <Home size={18} /> },
       { path: '/reports/reco-meg-situation', label: 'Situation MEG', icon: <Package size={18} /> },
-    ],
-  },
-  {
-    path: '/dashboards',
-    label: 'Tableaux de bord',
-    icon: <Gauge size={20} />,
-    children: [
-      { path: '/dashboards/monthly', label: 'Mensuel', icon: <BarChart3 size={18} /> },
-      { path: '/dashboards/realtime', label: 'Temps réel', icon: <Activity size={18} /> },
     ],
   },
   { path: '/maps', label: 'Cartes', icon: <Map size={20} /> },
@@ -73,7 +82,7 @@ const sidebarItems: SidebarItem[] = [
   { path: '/documentations', label: 'Documentation', icon: <BookOpen size={20} /> },
 ];
 
-export function Sidebar({ isOpen, isCollapsed = false, onClose }: SidebarProps) {
+export function Sidebar({ isOpen, isCollapsed = false, onClose, userName = 'Utilisateur', userRole = 'Admin', onLogout }: SidebarProps) {
   const location = useLocation();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
@@ -85,6 +94,22 @@ export function Sidebar({ isOpen, isCollapsed = false, onClose }: SidebarProps) 
 
   const isActive = (path: string) => location.pathname.startsWith(path);
   const isExpanded = (path: string) => expandedItems.includes(path);
+
+  // User menu items (mobile only)
+  const userMenuItems: SidebarItem[] = [
+    { path: '/settings', label: 'Paramètres', icon: <Settings size={20} /> },
+    {
+      path: '#',
+      label: 'Déconnexion',
+      icon: <LogOut size={20} />,
+      onClick: () => {
+        onClose?.();
+        onLogout?.();
+      },
+      isButton: true,
+      className: 'logout'
+    },
+  ];
 
   return (
     <>
@@ -115,6 +140,22 @@ export function Sidebar({ isOpen, isCollapsed = false, onClose }: SidebarProps) 
         transition={{ duration: 0.3, ease: 'easeOut' }}
       >
         <nav className={styles.nav}>
+          {/* User Section - Mobile Only - At Top */}
+          <div className={styles.userSection}>
+            <div className={styles.userInfo}>
+              <div className={styles.userAvatar}>
+                <User size={18} />
+              </div>
+              <div className={styles.userDetails}>
+                <div className={styles.userName}>{userName}</div>
+                <div className={styles.userRole}>{userRole}</div>
+              </div>
+            </div>
+
+            <div className={styles.divider} />
+          </div>
+
+          {/* Main Navigation */}
           {sidebarItems.map((item) => (
             <div key={item.path} className={styles.navGroup}>
               {item.children ? (
@@ -194,6 +235,53 @@ export function Sidebar({ isOpen, isCollapsed = false, onClose }: SidebarProps) 
               )}
             </div>
           ))}
+
+          {/* User Menu Items - Mobile Only - At Bottom */}
+          <div className={styles.userMenuSection}>
+            <div className={styles.divider} />
+
+            {userMenuItems.map((item) => (
+              <div key={item.path} className={styles.navGroup}>
+                {item.isButton ? (
+                  <button
+                    type="button"
+                    className={cn(
+                      styles.navItem,
+                      item.className === 'logout' && styles.logoutItem
+                    )}
+                    onClick={item.onClick}
+                  >
+                    <span className={styles.icon}>{item.icon}</span>
+                    <motion.span
+                      className={styles.label}
+                      variants={sidebarItemTextVariants}
+                      animate={isCollapsed ? 'collapsed' : 'expanded'}
+                    >
+                      {item.label}
+                    </motion.span>
+                  </button>
+                ) : (
+                  <Link
+                    to={item.path}
+                    className={cn(
+                      styles.navItem,
+                      isActive(item.path) && styles.active
+                    )}
+                    onClick={onClose}
+                  >
+                    <span className={styles.icon}>{item.icon}</span>
+                    <motion.span
+                      className={styles.label}
+                      variants={sidebarItemTextVariants}
+                      animate={isCollapsed ? 'collapsed' : 'expanded'}
+                    >
+                      {item.label}
+                    </motion.span>
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
         </nav>
       </motion.aside>
     </>

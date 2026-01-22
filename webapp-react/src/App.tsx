@@ -48,6 +48,9 @@ function AppContent() {
             isOpen={sidebarOpen}
             isCollapsed={sidebarCollapsed}
             onClose={() => setSidebarOpen(false)}
+            userName={user?.fullname || 'Utilisateur'}
+            userRole={user?.roles?.[0]?.name || 'Admin'}
+            onLogout={handleLogout}
           />
         </>
       )}

@@ -40,7 +40,6 @@ export interface NavbarProps {
 }
 
 const defaultNavItems: NavItem[] = [
-  { path: '/reports', label: 'Rapports', icon: <FileText size={18} /> },
   {
     path: '/dashboards',
     label: 'Tableaux de bord',
@@ -50,6 +49,7 @@ const defaultNavItems: NavItem[] = [
       { path: '/dashboards/realtime', label: 'Temps réel', icon: <Gauge size={16} /> },
     ],
   },
+  { path: '/reports', label: 'Rapports', icon: <FileText size={18} /> },
   { path: '/maps', label: 'Cartes', icon: <Map size={18} /> },
   { path: '/users', label: 'Utilisateurs', icon: <Users size={18} /> },
   { path: '/administration', label: 'Administration', icon: <Shield size={18} /> },
@@ -58,13 +58,13 @@ const defaultNavItems: NavItem[] = [
 
 // Menu items for the DHIS2-style app menu grid
 const appMenuItems: NavItem[] = [
-  { path: '/reports', label: 'Rapports', icon: <BarChart3 size={28} /> },
   { path: '/dashboards/monthly', label: 'Dashboards Mensuels', icon: <Gauge size={28} /> },
   { path: '/dashboards/realtime', label: 'Dashboards Dynamique', icon: <BarChart3 size={28} /> },
+  { path: '/reports', label: 'Rapports', icon: <BarChart3 size={28} /> },
   { path: '/maps', label: 'Geolocalisation (Maps)', icon: <Map size={28} /> },
   { path: '/users', label: 'Utilisateurs', icon: <Users size={28} /> },
-  { path: '/documentations', label: 'Documentations', icon: <BookOpen size={28} /> },
   { path: '/administration', label: 'Administration', icon: <Shield size={28} /> },
+  { path: '/documentations', label: 'Documentations', icon: <BookOpen size={28} /> },
 ];
 
 export function Navbar({
@@ -288,10 +288,6 @@ export function Navbar({
                   animate="animate"
                   exit="exit"
                 >
-                  <Link to="/profile" className={styles.userMenuItem} onClick={() => setUserMenuOpen(false)}>
-                    <User size={16} />
-                    <span>Profil</span>
-                  </Link>
                   <Link to="/settings" className={styles.userMenuItem} onClick={() => setUserMenuOpen(false)}>
                     <Settings size={16} />
                     <span>Paramètres</span>

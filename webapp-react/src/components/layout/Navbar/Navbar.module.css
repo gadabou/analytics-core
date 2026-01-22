@@ -192,6 +192,13 @@
 /* User Menu */
 .userMenuWrapper {
   position: relative;
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .userMenuWrapper {
+    display: block;
+  }
 }
 
 .userButton {
@@ -306,6 +313,13 @@
 /* App Menu - DHIS2 Style */
 .appMenuWrapper {
   position: relative;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .appMenuWrapper {
+    display: block;
+  }
 }
 
 .appMenu {
