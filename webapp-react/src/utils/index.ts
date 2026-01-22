@@ -61,3 +61,13 @@ export {
   groupBy,
   uniqueBy,
 } from './helpers';
+
+export {
+  currentYear,
+  currentMonth,
+  getMonthsList,
+  getYearsList,
+  notNull,
+} from './date';
+
+export type { Month } from './date';

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { OrgUnitsFilter, type OrgUnitSelection } from '../OrgUnitsFilter';
-import { MonthYearFilter } from '../MonthYearFilter';
+import { OrgUnitsFilter, type OrgUnitSelection, type FilterFormData } from '../OrgUnitsFilter';
+import { Filter, RefreshCw } from 'lucide-react';
 import styles from './ReportFilters.module.css';
 
 export interface ReportFilterValues {
@@ -27,28 +27,31 @@ export function ReportFilters({
   isLoading = false,
   className = '',
 }: ReportFiltersProps) {
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [month, setMonth] = useState<string>('');
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [recos, setRecos] = useState<string[]>([]);
   const [orgUnitSelection, setOrgUnitSelection] = useState<OrgUnitSelection>({
-    countries: [],
-    regions: [],
-    prefectures: [],
-    communes: [],
-    hospitals: [],
-    districtQuartiers: [],
-    villageSecteurs: [],
+    country: [],
+    region: [],
+    prefecture: [],
+    commune: [],
+    hospital: [],
+    district_quartier: [],
+    chws: [],
+    village_secteur: [],
     recos: [],
+    all_recos_ids: [],
+    selected_recos_ids: [],
   });
 
-  const handleMonthYearChange = useCallback((newMonth: string, newYear: number) => {
-    setMonth(newMonth);
-    setYear(newYear);
-  }, []);
-
-  const handleOrgUnitChange = useCallback((selection: OrgUnitSelection, recoIds: string[]) => {
-    setOrgUnitSelection(selection);
-    setRecos(recoIds);
+  const handleOrgUnitsFilterChange = useCallback((formData: FilterFormData) => {
+    if (formData.org_units) {
+      setOrgUnitSelection(formData.org_units);
+      setRecos(formData.org_units.selected_recos_ids);
+    }
+    setMonth(formData.months[0]);
+    setYear(formData.year);
   }, []);
 
   const handleFilter = () => {
@@ -63,74 +66,82 @@ export function ReportFilters({
   const canFilter = month && year && recos.length > 0;
 
   return (
-    <div className={`${styles.container} ${className}`}>
-      <div className={styles.filtersSection}>
-        <div className={styles.dateFilters}>
-          <MonthYearFilter
-            onChange={handleMonthYearChange}
-          />
+    <>
+      <div className={`${styles.container} ${className}`}>
+        <div className={styles.filterInfo}>
+          <p className={styles.filterText}>
+            {canFilter ? (
+              <>
+                <strong>{recos.length}</strong> RECO(s) sélectionné(s) |
+                Année: <strong>{year}</strong> |
+                Mois: <strong>{month}</strong>
+              </>
+            ) : (
+              'Aucun filtre appliqué - Cliquez sur "Filtrer" pour commencer'
+            )}
+          </p>
         </div>
 
-        <div className={styles.orgUnitFilters}>
-          <h4 className={styles.sectionTitle}>Unites Organisationnelles</h4>
-          <OrgUnitsFilter
-            onChange={handleOrgUnitChange}
-            showRecoLevel={true}
-            multiSelect={false}
-          />
-        </div>
-      </div>
-
-      <div className={styles.actions}>
-        <button
-          className={styles.filterButton}
-          onClick={handleFilter}
-          disabled={!canFilter || isLoading}
-        >
-          {isLoading ? (
-            <>
-              <span className={styles.spinner} />
-              Chargement...
-            </>
-          ) : (
-            <>
-              <svg className={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2.586a1 1 0 0 1-.293.707l-6.414 6.414a1 1 0 0 0-.293.707V17l-4 4v-6.586a1 1 0 0 0-.293-.707L3.293 7.293A1 1 0 0 1 3 6.586V4z" />
-              </svg>
-              Filtrer
-            </>
-          )}
-        </button>
-
-        {showSyncButton && onSync && (
+        <div className={styles.actions}>
           <button
-            className={styles.syncButton}
-            onClick={onSync}
-            disabled={isSyncing || isLoading}
+            className={styles.filterButton}
+            onClick={() => setIsFilterModalOpen(true)}
           >
-            {isSyncing ? (
+            <Filter size={18} />
+            Filtrer
+          </button>
+
+          <button
+            className={styles.applyButton}
+            onClick={handleFilter}
+            disabled={!canFilter || isLoading}
+          >
+            {isLoading ? (
               <>
                 <span className={styles.spinner} />
-                Synchronisation...
+                Chargement...
               </>
             ) : (
               <>
                 <svg className={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15" />
+                  <path d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0z" />
                 </svg>
-                Synchroniser
+                Appliquer
               </>
             )}
           </button>
-        )}
+
+          {showSyncButton && onSync && (
+            <button
+              className={styles.syncButton}
+              onClick={onSync}
+              disabled={isSyncing || isLoading}
+            >
+              {isSyncing ? (
+                <>
+                  <RefreshCw size={18} className={styles.spinning} />
+                  Synchronisation...
+                </>
+              ) : (
+                <>
+                  <RefreshCw size={18} />
+                  Synchroniser
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
-      {!canFilter && (
-        <p className={styles.hint}>
-          Selectionnez un mois, une annee et au moins un RECO pour filtrer les donnees.
-        </p>
-      )}
-    </div>
+      <OrgUnitsFilter
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        onChange={handleOrgUnitsFilterChange}
+        showMonthsSelection={true}
+        showYearsSelection={true}
+        showMultipleSelectionMonth={false}
+      />
+    </>
   );
 }
 

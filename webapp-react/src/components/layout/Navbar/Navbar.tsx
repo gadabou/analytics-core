@@ -16,7 +16,6 @@ import {
   Shield,
   BookOpen,
   Gauge,
-  Grid3X3,
   Search,
   Mail,
 } from 'lucide-react';

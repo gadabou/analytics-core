@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Lock, Settings as SettingsIcon, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, Eye, EyeOff } from 'lucide-react';
 import { PageHeader } from '@components/layout';
 import { useStore } from '@store';
 import styles from './SettingsPage.module.css';
@@ -18,7 +18,6 @@ export default function SettingsPage() {
       <PageHeader
         title="Paramètres"
         subtitle="Gérez votre profil et vos préférences"
-        icon={<SettingsIcon size={24} />}
       />
 
       <div className={styles.content}>
@@ -71,9 +70,6 @@ export default function SettingsPage() {
                 {user?.roles?.map((role, index) => (
                   <div key={index} className={styles.roleItem}>
                     <div className={styles.roleName}>{role.name}</div>
-                    {role.description && (
-                      <div className={styles.roleDescription}>{role.description}</div>
-                    )}
                   </div>
                 ))}
               </div>

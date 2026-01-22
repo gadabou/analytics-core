@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Card, CardBody } from '@components/ui';
-import { OrgUnitsFilter, type OrgUnitSelection } from '@components/filters/OrgUnitsFilter/OrgUnitsFilter';
-import { MonthYearFilter } from '@components/filters/MonthYearFilter/MonthYearFilter';
+import { OrgUnitsFilter, type FilterFormData } from '@components/filters/OrgUnitsFilter';
 import { Button } from '@components/ui/Button/Button';
-import { Search, RefreshCw, X } from 'lucide-react';
+import { Search, RefreshCw, X, Filter } from 'lucide-react';
 import styles from './DashboardFilters.module.css';
 
 interface FilterValues {
@@ -30,6 +29,7 @@ export function DashboardFilters({
   const currentYear = new Date().getFullYear();
   const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
 
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<string>(
     initialValues?.months?.[0] || currentMonth
   );
@@ -38,13 +38,12 @@ export function DashboardFilters({
   const [startDate, setStartDate] = useState<string>(initialValues?.start_date || '');
   const [endDate, setEndDate] = useState<string>(initialValues?.end_date || '');
 
-  const handleOrgUnitsChange = (_selection: OrgUnitSelection, recoIds: string[]) => {
-    setSelectedRecos(recoIds);
-  };
-
-  const handleMonthYearChange = (month: string, year: number) => {
-    setSelectedMonth(month);
-    setSelectedYear(year);
+  const handleOrgUnitsFilterChange = (formData: FilterFormData) => {
+    if (formData.org_units) {
+      setSelectedRecos(formData.org_units.selected_recos_ids);
+    }
+    setSelectedMonth(formData.months[0]);
+    setSelectedYear(formData.year);
   };
 
   const handleFilter = () => {
@@ -75,25 +74,22 @@ export function DashboardFilters({
   };
 
   return (
-    <Card className={styles.filterCard}>
-      <CardBody>
-        <div className={styles.filtersContainer}>
-          <div className={styles.filterRow}>
-            <div className={styles.filterGroup}>
-              <label className={styles.filterLabel}>Unités Organisationnelles</label>
-              <OrgUnitsFilter
-                onChange={handleOrgUnitsChange}
-              />
-            </div>
-          </div>
-
-          <div className={styles.filterRow}>
-            <div className={styles.filterGroup}>
-              <MonthYearFilter
-                onChange={handleMonthYearChange}
-                defaultMonth={selectedMonth}
-                defaultYear={selectedYear}
-              />
+    <>
+      <Card className={styles.filterCard}>
+        <CardBody>
+          <div className={styles.filtersContainer}>
+            <div className={styles.filterInfo}>
+              <p className={styles.filterText}>
+                {selectedRecos.length > 0 ? (
+                  <>
+                    <strong>{selectedRecos.length}</strong> RECO(s) sélectionné(s) |
+                    Année: <strong>{selectedYear}</strong> |
+                    Mois: <strong>{selectedMonth}</strong>
+                  </>
+                ) : (
+                  'Aucun filtre appliqué'
+                )}
+              </p>
             </div>
 
             {showDateRange && (
@@ -118,39 +114,58 @@ export function DashboardFilters({
                 </div>
               </div>
             )}
-          </div>
 
-          <div className={styles.filterActions}>
-            <Button
-              variant="primary"
-              onClick={handleFilter}
-              disabled={isLoading || selectedRecos.length === 0}
-              className={styles.filterButton}
-            >
-              {isLoading ? (
-                <>
-                  <RefreshCw size={16} className={styles.spinning} />
-                  Chargement...
-                </>
-              ) : (
-                <>
-                  <Search size={16} />
-                  Filtrer
-                </>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleReset}
-              disabled={isLoading}
-              className={styles.resetButton}
-            >
-              <X size={16} />
-              Réinitialiser
-            </Button>
+            <div className={styles.filterActions}>
+              <Button
+                variant="outline"
+                onClick={() => setIsFilterModalOpen(true)}
+                className={styles.filterButton}
+              >
+                <Filter size={16} />
+                Filtrer
+              </Button>
+
+              <Button
+                variant="primary"
+                onClick={handleFilter}
+                disabled={isLoading || selectedRecos.length === 0}
+                className={styles.applyButton}
+              >
+                {isLoading ? (
+                  <>
+                    <RefreshCw size={16} className={styles.spinning} />
+                    Chargement...
+                  </>
+                ) : (
+                  <>
+                    <Search size={16} />
+                    Appliquer
+                  </>
+                )}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                disabled={isLoading}
+                className={styles.resetButton}
+              >
+                <X size={16} />
+                Réinitialiser
+              </Button>
+            </div>
           </div>
-        </div>
-      </CardBody>
-    </Card>
+        </CardBody>
+      </Card>
+
+      <OrgUnitsFilter
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        onChange={handleOrgUnitsFilterChange}
+        showMonthsSelection={true}
+        showYearsSelection={true}
+        showMultipleSelectionMonth={false}
+      />
+    </>
   );
 }
