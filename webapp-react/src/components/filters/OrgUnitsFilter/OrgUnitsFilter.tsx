@@ -11,7 +11,7 @@ import type {
   RecosMap,
 } from '@/types';
 import { useAuth } from '@store';
-import { currentYear, currentMonth, getMonthsList, getYearsList, notNull } from '@/utils/date';
+import { notNull } from '@/utils/date';
 import styles from './OrgUnitsFilter.module.css';
 
 export interface OrgUnitSelection {
@@ -29,8 +29,8 @@ export interface OrgUnitSelection {
 }
 
 export interface FilterFormData {
-  year: number;
-  months: string[];
+  start_date: string; // Format: YYYY-MM-DD
+  end_date: string;   // Format: YYYY-MM-DD
   country?: string[];
   region?: string[];
   prefecture?: string[];
@@ -45,22 +45,39 @@ export interface FilterFormData {
 interface OrgUnitsFilterProps {
   onChange?: (formData: FilterFormData) => void;
   showRecoLevel?: boolean;
-  showMonthsSelection?: boolean;
-  showYearsSelection?: boolean;
-  showMultipleSelectionMonth?: boolean;
+  showDateSelection?: boolean;
   className?: string;
   isOpen?: boolean;
   onClose?: () => void;
 }
 
-const CUSTOM_MONTHS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+// Helper function to get default start date (21st of previous month)
+function getDefaultStartDate(): string {
+  const now = new Date();
+  // Go to previous month
+  const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 21);
+  return formatDateToISO(prevMonth);
+}
+
+// Helper function to get default end date (20th of current month)
+function getDefaultEndDate(): string {
+  const now = new Date();
+  const endDate = new Date(now.getFullYear(), now.getMonth(), 20);
+  return formatDateToISO(endDate);
+}
+
+// Format date to YYYY-MM-DD (for input type="date")
+function formatDateToISO(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export function OrgUnitsFilter({
   onChange,
   showRecoLevel = true,
-  showMonthsSelection = true,
-  showYearsSelection = true,
-  showMultipleSelectionMonth = true,
+  showDateSelection = true,
   className = '',
   isOpen = false,
   onClose,
@@ -78,10 +95,9 @@ export function OrgUnitsFilter({
   const Chws$ = useMemo(() => user?.chws ?? [], [user?.chws]);
   const Recos$ = useMemo(() => user?.recos ?? [], [user?.recos]);
 
-  // Date values
-  const year$ = useMemo(() => currentYear(), []);
-  const month$ = useMemo(() => currentMonth(), []);
-  const Years$ = useMemo(() => getYearsList().filter(y => y <= year$), [year$]);
+  // Date values - default: 21/previous month to 20/current month
+  const [startDate, setStartDate] = useState(() => getDefaultStartDate());
+  const [endDate, setEndDate] = useState(() => getDefaultEndDate());
 
   // Filtered org units state (cascading filtered data)
   const [countries, setCountries] = useState<CountryMap[]>([]);
@@ -92,10 +108,8 @@ export function OrgUnitsFilter({
   const [districtQuartiers, setDistrictQuartiers] = useState<DistrictQuartiersMap[]>([]);
   const [recos, setRecos] = useState<RecosMap[]>([]);
 
-  // Form values state
+  // Form values state for org units
   const [formValues, setFormValues] = useState<Record<string, string[]>>({
-    year: [year$.toString()],
-    months: showMonthsSelection ? [month$.id] : CUSTOM_MONTHS,
     country: [],
     region: [],
     prefecture: [],
@@ -104,11 +118,6 @@ export function OrgUnitsFilter({
     district_quartier: [],
     recos: [],
   });
-
-  // Months based on selected year
-  const [Months$, setMonths$] = useState(() =>
-    getMonthsList().filter(m => m.uid <= month$.uid)
-  );
 
   // Helper functions
   const getVal = useCallback((field: string): string[] => {
@@ -362,7 +371,7 @@ export function OrgUnitsFilter({
 
   // Select all handlers
   const selectAll = useCallback((
-    cible: 'country' | 'region' | 'prefecture' | 'commune' | 'hospital' | 'district_quartier' | 'recos' | 'months',
+    cible: 'country' | 'region' | 'prefecture' | 'commune' | 'hospital' | 'district_quartier' | 'recos',
     checked: boolean
   ) => {
     if (cible === 'country') {
@@ -386,12 +395,10 @@ export function OrgUnitsFilter({
     } else if (cible === 'recos') {
       const ids = checked ? recos.map(r => r.id) : [];
       handleRecosChange(ids);
-    } else if (cible === 'months') {
-      setMultipleValues('months', checked ? Months$.map(m => m.id) : []);
     }
-  }, [countries, regions, prefectures, communes, hospitals, districtQuartiers, recos, Months$,
+  }, [countries, regions, prefectures, communes, hospitals, districtQuartiers, recos,
       handleCountryChange, handleRegionChange, handlePrefectureChange, handleCommuneChange,
-      handleHospitalChange, handleDistrictQuartierChange, handleRecosChange, setMultipleValues]);
+      handleHospitalChange, handleDistrictQuartierChange, handleRecosChange]);
 
   // Check if all are selected
   const isChecked = useCallback((cible: string): boolean => {
@@ -403,25 +410,14 @@ export function OrgUnitsFilter({
     if (cible === 'hospital') return notNull(value) && value.length === hospitals.length && hospitals.length > 0;
     if (cible === 'district_quartier') return notNull(value) && value.length === districtQuartiers.length && districtQuartiers.length > 0;
     if (cible === 'recos') return notNull(value) && value.length === recos.length && recos.length > 0;
-    if (cible === 'months') return notNull(value) && value.length === Months$.length && Months$.length > 0;
     return false;
-  }, [getVal, countries, regions, prefectures, communes, hospitals, districtQuartiers, recos, Months$]);
+  }, [getVal, countries, regions, prefectures, communes, hospitals, districtQuartiers, recos]);
 
   // Get selected count
   const selectedLength = useCallback((cible: string): number => {
     const val = getVal(cible);
     return notNull(val) ? val.length : 0;
   }, [getVal]);
-
-  // Handle year change - update available months
-  const initMonths = useCallback((selectedYear: number) => {
-    if (selectedYear < year$) {
-      setMonths$(getMonthsList());
-    } else {
-      setMonths$(getMonthsList().filter(m => m.uid <= month$.uid));
-    }
-    setMultipleValues('year', [selectedYear.toString()]);
-  }, [year$, month$, setMultipleValues]);
 
   // Get ORG_UNITS object
   const getOrgUnits = useCallback((): OrgUnitSelection => {
@@ -446,8 +442,8 @@ export function OrgUnitsFilter({
     e.preventDefault();
 
     const formData: FilterFormData = {
-      year: parseInt(getVal('year')[0]) || year$,
-      months: getVal('months'),
+      start_date: startDate,
+      end_date: endDate,
       country: getVal('country'),
       region: getVal('region'),
       prefecture: getVal('prefecture'),
@@ -460,7 +456,7 @@ export function OrgUnitsFilter({
 
     onChange?.(formData);
     onClose?.();
-  }, [getVal, getOrgUnits, year$, onChange, onClose]);
+  }, [getVal, getOrgUnits, startDate, endDate, onChange, onClose]);
 
   // Handle close modal
   const handleClose = useCallback(() => {
@@ -677,57 +673,31 @@ export function OrgUnitsFilter({
               </div>
             )}
 
-            {/* Years */}
-            {showYearsSelection && Years$.length > 0 && (
+            {/* Date de debut */}
+            {showDateSelection && (
               <div className={styles.formGroup}>
-                <label htmlFor="year">Annees :</label>
-                <select
-                  id="year"
+                <label htmlFor="start_date">Date de debut :</label>
+                <input
+                  id="start_date"
+                  type="date"
                   className={styles.formControl}
-                  value={getVal('year')[0] || year$.toString()}
-                  onChange={(e) => initMonths(parseInt(e.target.value))}
-                >
-                  {Years$.map(y => (
-                    <option key={y} value={y}>{y}</option>
-                  ))}
-                </select>
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
               </div>
             )}
 
-            {/* Months */}
-            {showMonthsSelection && Months$.length > 0 && (
+            {/* Date de fin */}
+            {showDateSelection && (
               <div className={styles.formGroup}>
-                <label htmlFor="months">
-                  Mois :
-                  {showMultipleSelectionMonth && (
-                    <>
-                      ({selectedLength('months')})
-                      <input
-                        id="all-months"
-                        type="checkbox"
-                        checked={isChecked('months')}
-                        onChange={(e) => selectAll('months', e.target.checked)}
-                      />
-                    </>
-                  )}
-                </label>
-                <select
-                  id="months"
+                <label htmlFor="end_date">Date de fin :</label>
+                <input
+                  id="end_date"
+                  type="date"
                   className={styles.formControl}
-                  multiple={showMultipleSelectionMonth}
-                  value={showMultipleSelectionMonth ? getVal('months') : getVal('months')[0]}
-                  onChange={(e) => {
-                    if (showMultipleSelectionMonth) {
-                      setMultipleValues('months', getSelectedValues(e));
-                    } else {
-                      setMultipleValues('months', [e.target.value]);
-                    }
-                  }}
-                >
-                  {Months$.map(m => (
-                    <option key={m.id} value={m.id}>{m.labelFR}</option>
-                  ))}
-                </select>
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
               </div>
             )}
 

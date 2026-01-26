@@ -331,8 +331,8 @@ export interface RecoTasksStateDashboard {
 
 // Dashboard filter params
 export interface DashboardFilterParams {
-  year: number;
-  month?: string;
+  start_date: string;
+  end_date: string;
   countryId?: string;
   regionId?: string;
   prefectureId?: string;

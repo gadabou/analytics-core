@@ -31,8 +31,8 @@ export function useReports() {
         let response;
 
         const apiParams = {
-          months: filterParams.months.map(m => String(m).padStart(2, '0')),
-          year: filterParams.year,
+          start_date: filterParams.start_date,
+          end_date: filterParams.end_date,
           recos: filterParams.recos,
         };
 
@@ -68,10 +68,10 @@ export function useReports() {
             isValidated: responseData.is_validate ?? false,
             isOnDhis2: responseData.already_on_dhis2 ?? false,
           });
-          showSuccess(`${reportType} récupéré avec succès`);
+          showSuccess(`${reportType} recupere avec succes`);
         } else {
           setReportStatus(reportType, { isLoading: false });
-          showWarning(`Aucune donnée trouvée pour ${reportType}`);
+          showWarning(`Aucune donnee trouvee pour ${reportType}`);
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Erreur lors du chargement';
@@ -122,8 +122,8 @@ export function useReports() {
         }
 
         const apiParams = {
-          months: params.months.map(m => String(m).padStart(2, '0')),
-          year: params.year,
+          start_date: params.start_date,
+          end_date: params.end_date,
           recos: params.recos,
           dataIds: (params as any).dataIds,
         };
@@ -154,7 +154,7 @@ export function useReports() {
 
         if (response?.status === 200) {
           setReportStatus(reportType, { isValidating: false, isValidated: true });
-          showSuccess(`${reportType} validé avec succès`);
+          showSuccess(`${reportType} valide avec succes`);
           // Refresh the report data
           await fetchReport(reportType, filters);
         } else {
@@ -188,8 +188,8 @@ export function useReports() {
         }
 
         const cancelApiParams = {
-          months: params.months.map(m => String(m).padStart(2, '0')),
-          year: params.year,
+          start_date: params.start_date,
+          end_date: params.end_date,
           recos: params.recos,
           dataIds: (params as any).dataIds,
         };
@@ -220,7 +220,7 @@ export function useReports() {
 
         if (response?.status === 200) {
           setReportStatus(reportType, { isCancellingValidation: false, isValidated: false });
-          showSuccess(`Validation du ${reportType} annulée`);
+          showSuccess(`Validation du ${reportType} annulee`);
           await fetchReport(reportType, filters);
         } else {
           setReportStatus(reportType, { isCancellingValidation: false });

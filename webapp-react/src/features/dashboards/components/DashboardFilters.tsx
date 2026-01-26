@@ -6,34 +6,30 @@ import { Search, RefreshCw, X, Filter } from 'lucide-react';
 import styles from './DashboardFilters.module.css';
 
 interface FilterValues {
-  months: string[];
-  year: number;
+  start_date: string;
+  end_date: string;
   recos: string[];
-  start_date?: string;
-  end_date?: string;
 }
 
 interface DashboardFiltersProps {
   onFilter: (filters: FilterValues) => void;
   isLoading?: boolean;
-  showDateRange?: boolean;
   initialValues?: Partial<FilterValues>;
+}
+
+// Format date for display (DD/MM/YYYY)
+function formatDateDisplay(dateStr: string): string {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
 }
 
 export function DashboardFilters({
   onFilter,
   isLoading = false,
-  showDateRange = false,
   initialValues,
 }: DashboardFiltersProps) {
-  const currentYear = new Date().getFullYear();
-  const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
-
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState<string>(
-    initialValues?.months?.[0] || currentMonth
-  );
-  const [selectedYear, setSelectedYear] = useState<number>(initialValues?.year || currentYear);
   const [selectedRecos, setSelectedRecos] = useState<string[]>(initialValues?.recos || []);
   const [startDate, setStartDate] = useState<string>(initialValues?.start_date || '');
   const [endDate, setEndDate] = useState<string>(initialValues?.end_date || '');
@@ -42,8 +38,8 @@ export function DashboardFilters({
     if (formData.org_units) {
       setSelectedRecos(formData.org_units.selected_recos_ids);
     }
-    setSelectedMonth(formData.months[0]);
-    setSelectedYear(formData.year);
+    setStartDate(formData.start_date);
+    setEndDate(formData.end_date);
   };
 
   const handleFilter = () => {
@@ -52,22 +48,15 @@ export function DashboardFilters({
     }
 
     const filters: FilterValues = {
-      months: [selectedMonth],
-      year: selectedYear,
+      start_date: startDate,
+      end_date: endDate,
       recos: selectedRecos,
     };
-
-    if (showDateRange) {
-      filters.start_date = startDate;
-      filters.end_date = endDate;
-    }
 
     onFilter(filters);
   };
 
   const handleReset = () => {
-    setSelectedMonth(currentMonth);
-    setSelectedYear(currentYear);
     setSelectedRecos([]);
     setStartDate('');
     setEndDate('');
@@ -82,38 +71,14 @@ export function DashboardFilters({
               <p className={styles.filterText}>
                 {selectedRecos.length > 0 ? (
                   <>
-                    <strong>{selectedRecos.length}</strong> RECO(s) sélectionné(s) |
-                    Année: <strong>{selectedYear}</strong> |
-                    Mois: <strong>{selectedMonth}</strong>
+                    <strong>{selectedRecos.length}</strong> RECO(s) selectionne(s) |
+                    Du: <strong>{formatDateDisplay(startDate)}</strong> au <strong>{formatDateDisplay(endDate)}</strong>
                   </>
                 ) : (
-                  'Aucun filtre appliqué'
+                  'Aucun filtre applique'
                 )}
               </p>
             </div>
-
-            {showDateRange && (
-              <div className={styles.dateRangeGroup}>
-                <div className={styles.dateInput}>
-                  <label className={styles.filterLabel}>Date début</label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className={styles.input}
-                  />
-                </div>
-                <div className={styles.dateInput}>
-                  <label className={styles.filterLabel}>Date fin</label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className={styles.input}
-                  />
-                </div>
-              </div>
-            )}
 
             <div className={styles.filterActions}>
               <Button
@@ -151,7 +116,7 @@ export function DashboardFilters({
                 className={styles.resetButton}
               >
                 <X size={16} />
-                Réinitialiser
+                Reinitialiser
               </Button>
             </div>
           </div>
@@ -162,9 +127,7 @@ export function DashboardFilters({
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         onChange={handleOrgUnitsFilterChange}
-        showMonthsSelection={true}
-        showYearsSelection={true}
-        showMultipleSelectionMonth={false}
+        showDateSelection={true}
       />
     </>
   );

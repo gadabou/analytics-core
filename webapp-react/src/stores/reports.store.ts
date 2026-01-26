@@ -33,8 +33,8 @@ export interface ReportStatus {
 export type ReportsStatus = Record<ReportType, ReportStatus>;
 
 export interface FilterParams {
-  year: number;
-  months: number[];
+  start_date: string;
+  end_date: string;
   recos: string[];
   selectedRecosIds: string[];
   allRecosIds: string[];

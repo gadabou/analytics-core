@@ -12,19 +12,21 @@ interface ReportFiltersProps {
   initialValues?: Partial<FilterParams>;
 }
 
+// Format date for display (DD/MM/YYYY)
+function formatDateDisplay(dateStr: string): string {
+  if (!dateStr) return '';
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+}
+
 export function ReportFilters({
   onFilter,
   isLoading = false,
   initialValues,
 }: ReportFiltersProps) {
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth() + 1;
-
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [selectedMonths, setSelectedMonths] = useState<number[]>(
-    initialValues?.months || [currentMonth]
-  );
-  const [selectedYear, setSelectedYear] = useState<number>(initialValues?.year || currentYear);
+  const [startDate, setStartDate] = useState<string>(initialValues?.start_date || '');
+  const [endDate, setEndDate] = useState<string>(initialValues?.end_date || '');
   const [selectedRecos, setSelectedRecos] = useState<string[]>(initialValues?.recos || []);
   const [orgUnits, setOrgUnits] = useState<FilterParams['orgUnits']>(initialValues?.orgUnits || {});
 
@@ -34,8 +36,8 @@ export function ReportFilters({
     }
 
     const filters: FilterParams = {
-      months: selectedMonths,
-      year: selectedYear,
+      start_date: startDate,
+      end_date: endDate,
       recos: selectedRecos,
       selectedRecosIds: selectedRecos,
       allRecosIds: selectedRecos,
@@ -46,8 +48,8 @@ export function ReportFilters({
   };
 
   const handleReset = () => {
-    setSelectedMonths([currentMonth]);
-    setSelectedYear(currentYear);
+    setStartDate('');
+    setEndDate('');
     setSelectedRecos([]);
     setOrgUnits({});
   };
@@ -66,8 +68,8 @@ export function ReportFilters({
         village: org_units.village_secteur[0]?.id,
       });
     }
-    setSelectedMonths(formData.months.map(m => parseInt(m, 10)));
-    setSelectedYear(formData.year);
+    setStartDate(formData.start_date);
+    setEndDate(formData.end_date);
   };
 
   return (
@@ -79,12 +81,11 @@ export function ReportFilters({
               <p className={styles.filterText}>
                 {selectedRecos.length > 0 ? (
                   <>
-                    <strong>{selectedRecos.length}</strong> RECO(s) sélectionné(s) |
-                    Année: <strong>{selectedYear}</strong> |
-                    Mois: <strong>{selectedMonths.map(m => String(m).padStart(2, '0')).join(', ')}</strong>
+                    <strong>{selectedRecos.length}</strong> RECO(s) selectionne(s) |
+                    Du: <strong>{formatDateDisplay(startDate)}</strong> au <strong>{formatDateDisplay(endDate)}</strong>
                   </>
                 ) : (
-                  'Aucun filtre appliqué'
+                  'Aucun filtre applique'
                 )}
               </p>
             </div>
@@ -125,7 +126,7 @@ export function ReportFilters({
                 className={styles.resetButton}
               >
                 <X size={16} />
-                Réinitialiser
+                Reinitialiser
               </Button>
             </div>
           </div>
@@ -136,9 +137,7 @@ export function ReportFilters({
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         onChange={handleOrgUnitsFilterChange}
-        showMonthsSelection={true}
-        showYearsSelection={true}
-        showMultipleSelectionMonth={false}
+        showDateSelection={true}
       />
     </>
   );
