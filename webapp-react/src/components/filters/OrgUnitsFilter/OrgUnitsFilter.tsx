@@ -254,10 +254,10 @@ export function OrgUnitsFilter({
         <div className={styles.modalContent}>
           <form onSubmit={handleSubmit} noValidate>
             {/* Countries */}
-            {Countries$.length > 1 && (
+            {Countries$.length > 0 && (
               <div className={styles.formGroup}>
                 <label htmlFor="country">
-                  Pays : ({selectedCountries.length})
+                  Pays : ({selectedCountries.length}/{Countries$.length})
                   <input
                     id="all-country"
                     type="checkbox"
@@ -283,10 +283,10 @@ export function OrgUnitsFilter({
             )}
 
             {/* Regions */}
-            {Regions$.length > 1 && filteredRegions.length > 0 && (
+            {Regions$.length > 0 && (
               <div className={styles.formGroup}>
                 <label htmlFor="region">
-                  Regions : ({selectedRegions.length})
+                  Regions : ({selectedRegions.length}/{filteredRegions.length})
                   <input
                     id="all-region"
                     type="checkbox"
@@ -304,18 +304,22 @@ export function OrgUnitsFilter({
                     setSelectedRegions(values);
                   }}
                 >
-                  {filteredRegions.map(r => (
-                    <option key={r.id} value={r.id}>{r.name}</option>
-                  ))}
+                  {filteredRegions.length > 0 ? (
+                    filteredRegions.map(r => (
+                      <option key={r.id} value={r.id}>{r.name}</option>
+                    ))
+                  ) : (
+                    <option disabled>Selectionnez un pays</option>
+                  )}
                 </select>
               </div>
             )}
 
             {/* Prefectures */}
-            {Prefectures$.length > 1 && filteredPrefectures.length > 0 && (
+            {Prefectures$.length > 0 && (
               <div className={styles.formGroup}>
                 <label htmlFor="prefecture">
-                  Prefectures : ({selectedPrefectures.length})
+                  Prefectures : ({selectedPrefectures.length}/{filteredPrefectures.length})
                   <input
                     id="all-prefecture"
                     type="checkbox"
@@ -333,18 +337,22 @@ export function OrgUnitsFilter({
                     setSelectedPrefectures(values);
                   }}
                 >
-                  {filteredPrefectures.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
+                  {filteredPrefectures.length > 0 ? (
+                    filteredPrefectures.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))
+                  ) : (
+                    <option disabled>Selectionnez une region</option>
+                  )}
                 </select>
               </div>
             )}
 
             {/* Communes */}
-            {Communes$.length > 1 && filteredCommunes.length > 0 && (
+            {Communes$.length > 0 && (
               <div className={styles.formGroup}>
                 <label htmlFor="commune">
-                  Communes : ({selectedCommunes.length})
+                  Communes : ({selectedCommunes.length}/{filteredCommunes.length})
                   <input
                     id="all-commune"
                     type="checkbox"
@@ -362,18 +370,22 @@ export function OrgUnitsFilter({
                     setSelectedCommunes(values);
                   }}
                 >
-                  {filteredCommunes.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
+                  {filteredCommunes.length > 0 ? (
+                    filteredCommunes.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))
+                  ) : (
+                    <option disabled>Selectionnez une prefecture</option>
+                  )}
                 </select>
               </div>
             )}
 
             {/* Hospitals */}
-            {Hospitals$.length > 1 && filteredHospitals.length > 0 && (
+            {Hospitals$.length > 0 && (
               <div className={styles.formGroup}>
                 <label htmlFor="hospital">
-                  Centre de sante : ({selectedHospitals.length})
+                  Centre de sante : ({selectedHospitals.length}/{filteredHospitals.length})
                   <input
                     id="all-hospital"
                     type="checkbox"
@@ -391,18 +403,22 @@ export function OrgUnitsFilter({
                     setSelectedHospitals(values);
                   }}
                 >
-                  {filteredHospitals.map(h => (
-                    <option key={h.id} value={h.id}>{h.name}</option>
-                  ))}
+                  {filteredHospitals.length > 0 ? (
+                    filteredHospitals.map(h => (
+                      <option key={h.id} value={h.id}>{h.name}</option>
+                    ))
+                  ) : (
+                    <option disabled>Selectionnez une commune</option>
+                  )}
                 </select>
               </div>
             )}
 
             {/* District Quartiers */}
-            {DistrictQuartiers$.length > 1 && filteredDistrictQuartiers.length > 0 && (
+            {DistrictQuartiers$.length > 0 && (
               <div className={styles.formGroup}>
                 <label htmlFor="district_quartier">
-                  Districts/Quartiers : ({selectedDistrictQuartiers.length})
+                  Districts/Quartiers : ({selectedDistrictQuartiers.length}/{filteredDistrictQuartiers.length})
                   <input
                     id="all-district_quartier"
                     type="checkbox"
@@ -420,18 +436,22 @@ export function OrgUnitsFilter({
                     setSelectedDistrictQuartiers(values);
                   }}
                 >
-                  {filteredDistrictQuartiers.map(d => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
-                  ))}
+                  {filteredDistrictQuartiers.length > 0 ? (
+                    filteredDistrictQuartiers.map(d => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))
+                  ) : (
+                    <option disabled>Selectionnez un centre de sante</option>
+                  )}
                 </select>
               </div>
             )}
 
             {/* Recos */}
-            {showRecoLevel && Recos$.length > 1 && filteredRecos.length > 0 && (
+            {showRecoLevel && Recos$.length > 0 && (
               <div className={styles.formGroup}>
                 <label htmlFor="recos">
-                  Recos : ({selectedRecos.length})
+                  Recos : ({selectedRecos.length}/{filteredRecos.length})
                   <input
                     id="all-recos"
                     type="checkbox"
@@ -449,9 +469,13 @@ export function OrgUnitsFilter({
                     setSelectedRecos(values);
                   }}
                 >
-                  {filteredRecos.map(r => (
-                    <option key={r.id} value={r.id}>{r.name}</option>
-                  ))}
+                  {filteredRecos.length > 0 ? (
+                    filteredRecos.map(r => (
+                      <option key={r.id} value={r.id}>{r.name}</option>
+                    ))
+                  ) : (
+                    <option disabled>Selectionnez un district/quartier</option>
+                  )}
                 </select>
               </div>
             )}
