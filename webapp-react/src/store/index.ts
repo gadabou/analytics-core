@@ -3,6 +3,18 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 import { createAuthSlice, type AuthSlice } from './slices/authSlice';
 import { createUISlice, type UISlice } from './slices/uiSlice';
+import { USE_LOCAL_DATA } from '@/config/constants';
+import {
+  COUNTRIES,
+  REGIONS,
+  PREFECTURES,
+  COMMUNES,
+  HOSPITALS,
+  DISTRICT_QUARTIERS,
+  VILLAGE_SECTEURS,
+  CHWS,
+  RECOS,
+} from '@/utils/TestData';
 
 // Combined store type
 export type AppStore = AuthSlice & UISlice;
@@ -27,6 +39,23 @@ export const useStore = create<AppStore>()(
         isSidebarCollapsed: state.isSidebarCollapsed,
         theme: state.theme,
       }),
+      // Réhydratation: mettre à jour les org units depuis TestData si USE_LOCAL_DATA est true
+      onRehydrateStorage: () => (state) => {
+        if (state && state.user && USE_LOCAL_DATA) {
+          // Mettre à jour les org units avec les données de test
+          state.updateUser({
+            countries: COUNTRIES,
+            regions: REGIONS,
+            prefectures: PREFECTURES,
+            communes: COMMUNES,
+            hospitals: HOSPITALS,
+            districtQuartiers: DISTRICT_QUARTIERS,
+            villageSecteurs: VILLAGE_SECTEURS,
+            chws: CHWS,
+            recos: RECOS,
+          });
+        }
+      },
     }
   )
 );

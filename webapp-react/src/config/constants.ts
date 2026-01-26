@@ -3,6 +3,11 @@
 export const APP_NAME = 'Kendeya Analytics';
 export const APP_VERSION = '1.0.0';
 
+// Data source configuration
+// Si true: utilise les données locales de test (Database.ts / TestData.ts)
+// Si false: récupère les données depuis l'API backend
+export const USE_LOCAL_DATA = import.meta.env.VITE_USE_LOCAL_DATA === 'true' || true;
+
 // API
 export const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 export const API_TIMEOUT = 30000;

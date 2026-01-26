@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import type {
   CountryMap,
   RegionsMap,
@@ -53,7 +53,7 @@ interface OrgUnitsFilterProps {
   onClose?: () => void;
 }
 
-const ALL_MONTHS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+const CUSTOM_MONTHS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
 
 export function OrgUnitsFilter({
   onChange,
@@ -68,7 +68,7 @@ export function OrgUnitsFilter({
   const { user } = useAuth();
   const isInitialized = useRef(false);
 
-  // Static data from user (stable references)
+  // Static data from user (source data - never changes)
   const Countries$ = useMemo(() => user?.countries ?? [], [user?.countries]);
   const Regions$ = useMemo(() => user?.regions ?? [], [user?.regions]);
   const Prefectures$ = useMemo(() => user?.prefectures ?? [], [user?.prefectures]);
@@ -78,152 +78,389 @@ export function OrgUnitsFilter({
   const Chws$ = useMemo(() => user?.chws ?? [], [user?.chws]);
   const Recos$ = useMemo(() => user?.recos ?? [], [user?.recos]);
 
-  // Date values (stable)
+  // Date values
   const year$ = useMemo(() => currentYear(), []);
   const month$ = useMemo(() => currentMonth(), []);
   const Years$ = useMemo(() => getYearsList().filter(y => y <= year$), [year$]);
 
-  // Form state
-  const [selectedYear, setSelectedYear] = useState<string>(year$.toString());
-  const [selectedMonths, setSelectedMonths] = useState<string[]>(showMonthsSelection ? [month$.id] : ALL_MONTHS);
-  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
-  const [selectedPrefectures, setSelectedPrefectures] = useState<string[]>([]);
-  const [selectedCommunes, setSelectedCommunes] = useState<string[]>([]);
-  const [selectedHospitals, setSelectedHospitals] = useState<string[]>([]);
-  const [selectedDistrictQuartiers, setSelectedDistrictQuartiers] = useState<string[]>([]);
-  const [selectedRecos, setSelectedRecos] = useState<string[]>([]);
+  // Filtered org units state (cascading filtered data)
+  const [countries, setCountries] = useState<CountryMap[]>([]);
+  const [regions, setRegions] = useState<RegionsMap[]>([]);
+  const [prefectures, setPrefectures] = useState<PrefecturesMap[]>([]);
+  const [communes, setCommunes] = useState<CommunesMap[]>([]);
+  const [hospitals, setHospitals] = useState<HospitalsMap[]>([]);
+  const [districtQuartiers, setDistrictQuartiers] = useState<DistrictQuartiersMap[]>([]);
+  const [recos, setRecos] = useState<RecosMap[]>([]);
 
-  // Available months based on selected year
-  const Months$ = useMemo(() => {
-    const yearNum = parseInt(selectedYear);
-    if (yearNum < year$) {
-      return getMonthsList();
+  // Form values state
+  const [formValues, setFormValues] = useState<Record<string, string[]>>({
+    year: [year$.toString()],
+    months: showMonthsSelection ? [month$.id] : CUSTOM_MONTHS,
+    country: [],
+    region: [],
+    prefecture: [],
+    commune: [],
+    hospital: [],
+    district_quartier: [],
+    recos: [],
+  });
+
+  // Months based on selected year
+  const [Months$, setMonths$] = useState(() =>
+    getMonthsList().filter(m => m.uid <= month$.uid)
+  );
+
+  // Helper functions
+  const getVal = useCallback((field: string): string[] => {
+    return formValues[field] || [];
+  }, [formValues]);
+
+  const setMultipleValues = useCallback((field: string, values: string[]) => {
+    setFormValues(prev => ({ ...prev, [field]: values }));
+  }, []);
+
+  // ============ CASCADE GENERATION FUNCTIONS ============
+  // These mirror the Angular logic exactly - synchronous cascade
+
+  const recosGenerate = useCallback((currentDistrictQuartiers: DistrictQuartiersMap[], districtQuartierIds: string[]) => {
+    let filteredRecos: RecosMap[];
+
+    if (notNull(districtQuartierIds) && Recos$.length > 0) {
+      if (currentDistrictQuartiers.length > 0) {
+        filteredRecos = Recos$.filter(d => districtQuartierIds.includes(d.district_quartier_id));
+      } else {
+        filteredRecos = Recos$;
+      }
+    } else {
+      filteredRecos = Recos$;
     }
-    return getMonthsList().filter(m => m.uid <= month$.uid);
-  }, [selectedYear, year$, month$]);
 
-  // Initialize once when countries are available
+    setRecos(filteredRecos);
+    return filteredRecos.map(r => r.id);
+  }, [Recos$]);
+
+  const districtsGenerate = useCallback((currentHospitals: HospitalsMap[], hospitalIds: string[]) => {
+    let filteredDistricts: DistrictQuartiersMap[];
+
+    if (notNull(hospitalIds) && DistrictQuartiers$.length > 0) {
+      if (currentHospitals.length > 0) {
+        filteredDistricts = DistrictQuartiers$.filter(d => hospitalIds.includes(d.hospital_id));
+      } else {
+        filteredDistricts = DistrictQuartiers$;
+      }
+    } else {
+      filteredDistricts = [];
+    }
+
+    setDistrictQuartiers(filteredDistricts);
+    const districtIds = filteredDistricts.map(r => r.id);
+    const recoIds = recosGenerate(filteredDistricts, districtIds);
+
+    return { districtIds, recoIds };
+  }, [DistrictQuartiers$, recosGenerate]);
+
+  const hospitalsGenerate = useCallback((currentCommunes: CommunesMap[], communeIds: string[]) => {
+    let filteredHospitals: HospitalsMap[];
+
+    if (notNull(communeIds) && Hospitals$.length > 0) {
+      if (currentCommunes.length > 0) {
+        filteredHospitals = Hospitals$.filter(d => communeIds.includes(d.commune_id));
+      } else {
+        filteredHospitals = Hospitals$;
+      }
+    } else {
+      filteredHospitals = [];
+    }
+
+    setHospitals(filteredHospitals);
+    const hospitalIds = filteredHospitals.map(r => r.id);
+    const { districtIds, recoIds } = districtsGenerate(filteredHospitals, hospitalIds);
+
+    return { hospitalIds, districtIds, recoIds };
+  }, [Hospitals$, districtsGenerate]);
+
+  const communesGenerate = useCallback((currentPrefectures: PrefecturesMap[], prefectureIds: string[]) => {
+    let filteredCommunes: CommunesMap[];
+
+    if (notNull(prefectureIds) && Communes$.length > 0) {
+      if (currentPrefectures.length > 0) {
+        filteredCommunes = Communes$.filter(d => prefectureIds.includes(d.prefecture_id));
+      } else {
+        filteredCommunes = Communes$;
+      }
+    } else {
+      filteredCommunes = [];
+    }
+
+    setCommunes(filteredCommunes);
+    const communeIds = filteredCommunes.map(r => r.id);
+    const { hospitalIds, districtIds, recoIds } = hospitalsGenerate(filteredCommunes, communeIds);
+
+    return { communeIds, hospitalIds, districtIds, recoIds };
+  }, [Communes$, hospitalsGenerate]);
+
+  const prefecturesGenerate = useCallback((currentRegions: RegionsMap[], regionIds: string[]) => {
+    let filteredPrefectures: PrefecturesMap[];
+
+    if (notNull(regionIds) && Prefectures$.length > 0) {
+      if (currentRegions.length > 0) {
+        filteredPrefectures = Prefectures$.filter(d => regionIds.includes(d.region_id));
+      } else {
+        filteredPrefectures = Prefectures$;
+      }
+    } else {
+      filteredPrefectures = [];
+    }
+
+    setPrefectures(filteredPrefectures);
+    const prefectureIds = filteredPrefectures.map(r => r.id);
+    const { communeIds, hospitalIds, districtIds, recoIds } = communesGenerate(filteredPrefectures, prefectureIds);
+
+    return { prefectureIds, communeIds, hospitalIds, districtIds, recoIds };
+  }, [Prefectures$, communesGenerate]);
+
+  const regionsGenerate = useCallback((currentCountries: CountryMap[], countryIds: string[]) => {
+    let filteredRegions: RegionsMap[];
+
+    if (notNull(countryIds) && Regions$.length > 0) {
+      if (currentCountries.length > 0) {
+        filteredRegions = Regions$.filter(d => countryIds.includes(d.country_id));
+      } else {
+        filteredRegions = Regions$;
+      }
+    } else {
+      filteredRegions = [];
+    }
+
+    setRegions(filteredRegions);
+    const regionIds = filteredRegions.map(r => r.id);
+    const { prefectureIds, communeIds, hospitalIds, districtIds, recoIds } = prefecturesGenerate(filteredRegions, regionIds);
+
+    return { regionIds, prefectureIds, communeIds, hospitalIds, districtIds, recoIds };
+  }, [Regions$, prefecturesGenerate]);
+
+  const countriesGenerate = useCallback(() => {
+    const filteredCountries = Countries$;
+    setCountries(filteredCountries);
+    const countryIds = filteredCountries.map(c => c.id);
+    const { regionIds, prefectureIds, communeIds, hospitalIds, districtIds, recoIds } = regionsGenerate(filteredCountries, countryIds);
+
+    // Update all form values at once
+    setFormValues(prev => ({
+      ...prev,
+      country: countryIds,
+      region: regionIds,
+      prefecture: prefectureIds,
+      commune: communeIds,
+      hospital: hospitalIds,
+      district_quartier: districtIds,
+      recos: recoIds,
+    }));
+  }, [Countries$, regionsGenerate]);
+
+  // Initialize when data is available
   useEffect(() => {
     if (!isInitialized.current && Countries$.length > 0) {
       isInitialized.current = true;
-      setSelectedCountries(Countries$.map(c => c.id));
+      countriesGenerate();
     }
-  }, [Countries$]);
+  }, [Countries$, countriesGenerate]);
 
-  // Filtered options based on selections (computed, not state)
-  const filteredRegions = useMemo(() => {
-    if (!notNull(selectedCountries)) return [];
-    return Regions$.filter(r => selectedCountries.includes(r.country_id));
-  }, [selectedCountries, Regions$]);
+  // ============ EVENT HANDLERS ============
 
-  const filteredPrefectures = useMemo(() => {
-    if (!notNull(selectedRegions)) return [];
-    return Prefectures$.filter(p => selectedRegions.includes(p.region_id));
-  }, [selectedRegions, Prefectures$]);
+  // Handle country selection change
+  const handleCountryChange = useCallback((newCountryIds: string[]) => {
+    const currentCountries = Countries$.filter(c => newCountryIds.includes(c.id));
+    setCountries(currentCountries.length > 0 ? currentCountries : Countries$);
 
-  const filteredCommunes = useMemo(() => {
-    if (!notNull(selectedPrefectures)) return [];
-    return Communes$.filter(c => selectedPrefectures.includes(c.prefecture_id));
-  }, [selectedPrefectures, Communes$]);
+    const { regionIds, prefectureIds, communeIds, hospitalIds, districtIds, recoIds } = regionsGenerate(
+      currentCountries.length > 0 ? currentCountries : Countries$,
+      newCountryIds
+    );
 
-  const filteredHospitals = useMemo(() => {
-    if (!notNull(selectedCommunes)) return [];
-    return Hospitals$.filter(h => selectedCommunes.includes(h.commune_id));
-  }, [selectedCommunes, Hospitals$]);
+    setFormValues(prev => ({
+      ...prev,
+      country: newCountryIds,
+      region: regionIds,
+      prefecture: prefectureIds,
+      commune: communeIds,
+      hospital: hospitalIds,
+      district_quartier: districtIds,
+      recos: recoIds,
+    }));
+  }, [Countries$, regionsGenerate]);
 
-  const filteredDistrictQuartiers = useMemo(() => {
-    if (!notNull(selectedHospitals)) return [];
-    return DistrictQuartiers$.filter(d => selectedHospitals.includes(d.hospital_id));
-  }, [selectedHospitals, DistrictQuartiers$]);
+  // Handle region selection change
+  const handleRegionChange = useCallback((newRegionIds: string[]) => {
+    const { prefectureIds, communeIds, hospitalIds, districtIds, recoIds } = prefecturesGenerate(regions, newRegionIds);
 
-  const filteredRecos = useMemo(() => {
-    if (!notNull(selectedDistrictQuartiers)) return Recos$;
-    return Recos$.filter(r => selectedDistrictQuartiers.includes(r.district_quartier_id));
-  }, [selectedDistrictQuartiers, Recos$]);
+    setFormValues(prev => ({
+      ...prev,
+      region: newRegionIds,
+      prefecture: prefectureIds,
+      commune: communeIds,
+      hospital: hospitalIds,
+      district_quartier: districtIds,
+      recos: recoIds,
+    }));
+  }, [regions, prefecturesGenerate]);
+
+  // Handle prefecture selection change
+  const handlePrefectureChange = useCallback((newPrefectureIds: string[]) => {
+    const { communeIds, hospitalIds, districtIds, recoIds } = communesGenerate(prefectures, newPrefectureIds);
+
+    setFormValues(prev => ({
+      ...prev,
+      prefecture: newPrefectureIds,
+      commune: communeIds,
+      hospital: hospitalIds,
+      district_quartier: districtIds,
+      recos: recoIds,
+    }));
+  }, [prefectures, communesGenerate]);
+
+  // Handle commune selection change
+  const handleCommuneChange = useCallback((newCommuneIds: string[]) => {
+    const { hospitalIds, districtIds, recoIds } = hospitalsGenerate(communes, newCommuneIds);
+
+    setFormValues(prev => ({
+      ...prev,
+      commune: newCommuneIds,
+      hospital: hospitalIds,
+      district_quartier: districtIds,
+      recos: recoIds,
+    }));
+  }, [communes, hospitalsGenerate]);
+
+  // Handle hospital selection change
+  const handleHospitalChange = useCallback((newHospitalIds: string[]) => {
+    const { districtIds, recoIds } = districtsGenerate(hospitals, newHospitalIds);
+
+    setFormValues(prev => ({
+      ...prev,
+      hospital: newHospitalIds,
+      district_quartier: districtIds,
+      recos: recoIds,
+    }));
+  }, [hospitals, districtsGenerate]);
+
+  // Handle district quartier selection change
+  const handleDistrictQuartierChange = useCallback((newDistrictIds: string[]) => {
+    const recoIds = recosGenerate(districtQuartiers, newDistrictIds);
+
+    setFormValues(prev => ({
+      ...prev,
+      district_quartier: newDistrictIds,
+      recos: recoIds,
+    }));
+  }, [districtQuartiers, recosGenerate]);
+
+  // Handle recos selection change
+  const handleRecosChange = useCallback((newRecoIds: string[]) => {
+    setMultipleValues('recos', newRecoIds);
+  }, [setMultipleValues]);
 
   // Select all handlers
-  const handleSelectAllCountries = useCallback((checked: boolean) => {
-    setSelectedCountries(checked ? Countries$.map(c => c.id) : []);
-  }, [Countries$]);
+  const selectAll = useCallback((
+    cible: 'country' | 'region' | 'prefecture' | 'commune' | 'hospital' | 'district_quartier' | 'recos' | 'months',
+    checked: boolean
+  ) => {
+    if (cible === 'country') {
+      const ids = checked ? countries.map(r => r.id) : [];
+      handleCountryChange(ids);
+    } else if (cible === 'region') {
+      const ids = checked ? regions.map(r => r.id) : [];
+      handleRegionChange(ids);
+    } else if (cible === 'prefecture') {
+      const ids = checked ? prefectures.map(r => r.id) : [];
+      handlePrefectureChange(ids);
+    } else if (cible === 'commune') {
+      const ids = checked ? communes.map(r => r.id) : [];
+      handleCommuneChange(ids);
+    } else if (cible === 'hospital') {
+      const ids = checked ? hospitals.map(r => r.id) : [];
+      handleHospitalChange(ids);
+    } else if (cible === 'district_quartier') {
+      const ids = checked ? districtQuartiers.map(r => r.id) : [];
+      handleDistrictQuartierChange(ids);
+    } else if (cible === 'recos') {
+      const ids = checked ? recos.map(r => r.id) : [];
+      handleRecosChange(ids);
+    } else if (cible === 'months') {
+      setMultipleValues('months', checked ? Months$.map(m => m.id) : []);
+    }
+  }, [countries, regions, prefectures, communes, hospitals, districtQuartiers, recos, Months$,
+      handleCountryChange, handleRegionChange, handlePrefectureChange, handleCommuneChange,
+      handleHospitalChange, handleDistrictQuartierChange, handleRecosChange, setMultipleValues]);
 
-  const handleSelectAllRegions = useCallback((checked: boolean) => {
-    setSelectedRegions(checked ? filteredRegions.map(r => r.id) : []);
-  }, [filteredRegions]);
+  // Check if all are selected
+  const isChecked = useCallback((cible: string): boolean => {
+    const value = getVal(cible);
+    if (cible === 'country') return notNull(value) && value.length === countries.length && countries.length > 0;
+    if (cible === 'region') return notNull(value) && value.length === regions.length && regions.length > 0;
+    if (cible === 'prefecture') return notNull(value) && value.length === prefectures.length && prefectures.length > 0;
+    if (cible === 'commune') return notNull(value) && value.length === communes.length && communes.length > 0;
+    if (cible === 'hospital') return notNull(value) && value.length === hospitals.length && hospitals.length > 0;
+    if (cible === 'district_quartier') return notNull(value) && value.length === districtQuartiers.length && districtQuartiers.length > 0;
+    if (cible === 'recos') return notNull(value) && value.length === recos.length && recos.length > 0;
+    if (cible === 'months') return notNull(value) && value.length === Months$.length && Months$.length > 0;
+    return false;
+  }, [getVal, countries, regions, prefectures, communes, hospitals, districtQuartiers, recos, Months$]);
 
-  const handleSelectAllPrefectures = useCallback((checked: boolean) => {
-    setSelectedPrefectures(checked ? filteredPrefectures.map(p => p.id) : []);
-  }, [filteredPrefectures]);
+  // Get selected count
+  const selectedLength = useCallback((cible: string): number => {
+    const val = getVal(cible);
+    return notNull(val) ? val.length : 0;
+  }, [getVal]);
 
-  const handleSelectAllCommunes = useCallback((checked: boolean) => {
-    setSelectedCommunes(checked ? filteredCommunes.map(c => c.id) : []);
-  }, [filteredCommunes]);
+  // Handle year change - update available months
+  const initMonths = useCallback((selectedYear: number) => {
+    if (selectedYear < year$) {
+      setMonths$(getMonthsList());
+    } else {
+      setMonths$(getMonthsList().filter(m => m.uid <= month$.uid));
+    }
+    setMultipleValues('year', [selectedYear.toString()]);
+  }, [year$, month$, setMultipleValues]);
 
-  const handleSelectAllHospitals = useCallback((checked: boolean) => {
-    setSelectedHospitals(checked ? filteredHospitals.map(h => h.id) : []);
-  }, [filteredHospitals]);
-
-  const handleSelectAllDistrictQuartiers = useCallback((checked: boolean) => {
-    setSelectedDistrictQuartiers(checked ? filteredDistrictQuartiers.map(d => d.id) : []);
-  }, [filteredDistrictQuartiers]);
-
-  const handleSelectAllRecos = useCallback((checked: boolean) => {
-    setSelectedRecos(checked ? filteredRecos.map(r => r.id) : []);
-  }, [filteredRecos]);
-
-  const handleSelectAllMonths = useCallback((checked: boolean) => {
-    setSelectedMonths(checked ? Months$.map(m => m.id) : []);
-  }, [Months$]);
+  // Get ORG_UNITS object
+  const getOrgUnits = useCallback((): OrgUnitSelection => {
+    const selectedRecos = recos.filter(r => getVal('recos').includes(r.id));
+    return {
+      country: countries.filter(r => getVal('country').includes(r.id)),
+      region: regions.filter(r => getVal('region').includes(r.id)),
+      prefecture: prefectures.filter(r => getVal('prefecture').includes(r.id)),
+      commune: communes.filter(r => getVal('commune').includes(r.id)),
+      hospital: hospitals.filter(r => getVal('hospital').includes(r.id)),
+      district_quartier: districtQuartiers.filter(r => getVal('district_quartier').includes(r.id)),
+      chws: Chws$.filter(r => getVal('district_quartier').includes(r.district_quartier_id)),
+      village_secteur: [],
+      recos: selectedRecos,
+      all_recos_ids: Recos$.map(r => r.id),
+      selected_recos_ids: selectedRecos.map(r => r.id),
+    };
+  }, [countries, regions, prefectures, communes, hospitals, districtQuartiers, recos, Chws$, Recos$, getVal]);
 
   // Handle form submit
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
 
-    const selectedCountryObjs = Countries$.filter(c => selectedCountries.includes(c.id));
-    const selectedRegionObjs = filteredRegions.filter(r => selectedRegions.includes(r.id));
-    const selectedPrefectureObjs = filteredPrefectures.filter(p => selectedPrefectures.includes(p.id));
-    const selectedCommuneObjs = filteredCommunes.filter(c => selectedCommunes.includes(c.id));
-    const selectedHospitalObjs = filteredHospitals.filter(h => selectedHospitals.includes(h.id));
-    const selectedDistrictQuartierObjs = filteredDistrictQuartiers.filter(d => selectedDistrictQuartiers.includes(d.id));
-    const selectedRecoObjs = filteredRecos.filter(r => selectedRecos.includes(r.id));
-
-    const orgUnits: OrgUnitSelection = {
-      country: selectedCountryObjs,
-      region: selectedRegionObjs,
-      prefecture: selectedPrefectureObjs,
-      commune: selectedCommuneObjs,
-      hospital: selectedHospitalObjs,
-      district_quartier: selectedDistrictQuartierObjs,
-      chws: Chws$.filter(c => selectedDistrictQuartiers.includes(c.district_quartier_id)),
-      village_secteur: [],
-      recos: selectedRecoObjs,
-      all_recos_ids: Recos$.map(r => r.id),
-      selected_recos_ids: selectedRecoObjs.map(r => r.id),
-    };
-
     const formData: FilterFormData = {
-      year: parseInt(selectedYear) || year$,
-      months: selectedMonths,
-      country: selectedCountries,
-      region: selectedRegions,
-      prefecture: selectedPrefectures,
-      commune: selectedCommunes,
-      hospital: selectedHospitals,
-      district_quartier: selectedDistrictQuartiers,
-      recos: selectedRecos,
-      org_units: orgUnits,
+      year: parseInt(getVal('year')[0]) || year$,
+      months: getVal('months'),
+      country: getVal('country'),
+      region: getVal('region'),
+      prefecture: getVal('prefecture'),
+      commune: getVal('commune'),
+      hospital: getVal('hospital'),
+      district_quartier: getVal('district_quartier'),
+      recos: getVal('recos'),
+      org_units: getOrgUnits(),
     };
 
     onChange?.(formData);
     onClose?.();
-  }, [
-    selectedYear, selectedMonths, selectedCountries, selectedRegions,
-    selectedPrefectures, selectedCommunes, selectedHospitals,
-    selectedDistrictQuartiers, selectedRecos, Countries$, filteredRegions,
-    filteredPrefectures, filteredCommunes, filteredHospitals,
-    filteredDistrictQuartiers, filteredRecos, Chws$, Recos$, year$,
-    onChange, onClose
-  ]);
+  }, [getVal, getOrgUnits, year$, onChange, onClose]);
 
   // Handle close modal
   const handleClose = useCallback(() => {
@@ -241,6 +478,11 @@ export function OrgUnitsFilter({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleClose]);
 
+  // Helper to get values from multi-select
+  const getSelectedValues = (e: React.ChangeEvent<HTMLSelectElement>): string[] => {
+    return Array.from(e.target.selectedOptions, opt => opt.value);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -253,29 +495,26 @@ export function OrgUnitsFilter({
         </div>
         <div className={styles.modalContent}>
           <form onSubmit={handleSubmit} noValidate>
-            {/* Countries */}
-            {Countries$.length > 0 && (
+            {/* Countries - Show if: Countries$.length > 1 && countries.length === 0 || countries.length > 1 */}
+            {((Countries$.length > 1 && countries.length === 0) || countries.length > 1) && (
               <div className={styles.formGroup}>
                 <label htmlFor="country">
-                  Pays : ({selectedCountries.length}/{Countries$.length})
+                  Pays : ({selectedLength('country')})
                   <input
                     id="all-country"
                     type="checkbox"
-                    checked={selectedCountries.length === Countries$.length && Countries$.length > 0}
-                    onChange={(e) => handleSelectAllCountries(e.target.checked)}
+                    checked={isChecked('country')}
+                    onChange={(e) => selectAll('country', e.target.checked)}
                   />
                 </label>
                 <select
                   id="country"
                   className={styles.formControl}
                   multiple
-                  value={selectedCountries}
-                  onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, opt => opt.value);
-                    setSelectedCountries(values);
-                  }}
+                  value={getVal('country')}
+                  onChange={(e) => handleCountryChange(getSelectedValues(e))}
                 >
-                  {Countries$.map(c => (
+                  {countries.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
@@ -283,199 +522,157 @@ export function OrgUnitsFilter({
             )}
 
             {/* Regions */}
-            {Regions$.length > 0 && (
+            {((Regions$.length > 1 && regions.length === 0) || regions.length > 1) && (
               <div className={styles.formGroup}>
                 <label htmlFor="region">
-                  Regions : ({selectedRegions.length}/{filteredRegions.length})
+                  Regions : ({selectedLength('region')})
                   <input
                     id="all-region"
                     type="checkbox"
-                    checked={selectedRegions.length === filteredRegions.length && filteredRegions.length > 0}
-                    onChange={(e) => handleSelectAllRegions(e.target.checked)}
+                    checked={isChecked('region')}
+                    onChange={(e) => selectAll('region', e.target.checked)}
                   />
                 </label>
                 <select
                   id="region"
                   className={styles.formControl}
                   multiple
-                  value={selectedRegions}
-                  onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, opt => opt.value);
-                    setSelectedRegions(values);
-                  }}
+                  value={getVal('region')}
+                  onChange={(e) => handleRegionChange(getSelectedValues(e))}
                 >
-                  {filteredRegions.length > 0 ? (
-                    filteredRegions.map(r => (
-                      <option key={r.id} value={r.id}>{r.name}</option>
-                    ))
-                  ) : (
-                    <option disabled>Selectionnez un pays</option>
-                  )}
+                  {regions.map(r => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
                 </select>
               </div>
             )}
 
             {/* Prefectures */}
-            {Prefectures$.length > 0 && (
+            {((Prefectures$.length > 1 && prefectures.length === 0) || prefectures.length > 1) && (
               <div className={styles.formGroup}>
                 <label htmlFor="prefecture">
-                  Prefectures : ({selectedPrefectures.length}/{filteredPrefectures.length})
+                  Prefectures : ({selectedLength('prefecture')})
                   <input
                     id="all-prefecture"
                     type="checkbox"
-                    checked={selectedPrefectures.length === filteredPrefectures.length && filteredPrefectures.length > 0}
-                    onChange={(e) => handleSelectAllPrefectures(e.target.checked)}
+                    checked={isChecked('prefecture')}
+                    onChange={(e) => selectAll('prefecture', e.target.checked)}
                   />
                 </label>
                 <select
                   id="prefecture"
                   className={styles.formControl}
                   multiple
-                  value={selectedPrefectures}
-                  onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, opt => opt.value);
-                    setSelectedPrefectures(values);
-                  }}
+                  value={getVal('prefecture')}
+                  onChange={(e) => handlePrefectureChange(getSelectedValues(e))}
                 >
-                  {filteredPrefectures.length > 0 ? (
-                    filteredPrefectures.map(p => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))
-                  ) : (
-                    <option disabled>Selectionnez une region</option>
-                  )}
+                  {prefectures.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
                 </select>
               </div>
             )}
 
             {/* Communes */}
-            {Communes$.length > 0 && (
+            {((Communes$.length > 1 && communes.length === 0) || communes.length > 1) && (
               <div className={styles.formGroup}>
                 <label htmlFor="commune">
-                  Communes : ({selectedCommunes.length}/{filteredCommunes.length})
+                  Communes : ({selectedLength('commune')})
                   <input
                     id="all-commune"
                     type="checkbox"
-                    checked={selectedCommunes.length === filteredCommunes.length && filteredCommunes.length > 0}
-                    onChange={(e) => handleSelectAllCommunes(e.target.checked)}
+                    checked={isChecked('commune')}
+                    onChange={(e) => selectAll('commune', e.target.checked)}
                   />
                 </label>
                 <select
                   id="commune"
                   className={styles.formControl}
                   multiple
-                  value={selectedCommunes}
-                  onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, opt => opt.value);
-                    setSelectedCommunes(values);
-                  }}
+                  value={getVal('commune')}
+                  onChange={(e) => handleCommuneChange(getSelectedValues(e))}
                 >
-                  {filteredCommunes.length > 0 ? (
-                    filteredCommunes.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))
-                  ) : (
-                    <option disabled>Selectionnez une prefecture</option>
-                  )}
+                  {communes.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
                 </select>
               </div>
             )}
 
             {/* Hospitals */}
-            {Hospitals$.length > 0 && (
+            {((Hospitals$.length > 1 && hospitals.length === 0) || hospitals.length > 1) && (
               <div className={styles.formGroup}>
                 <label htmlFor="hospital">
-                  Centre de sante : ({selectedHospitals.length}/{filteredHospitals.length})
+                  Centre de sante : ({selectedLength('hospital')})
                   <input
                     id="all-hospital"
                     type="checkbox"
-                    checked={selectedHospitals.length === filteredHospitals.length && filteredHospitals.length > 0}
-                    onChange={(e) => handleSelectAllHospitals(e.target.checked)}
+                    checked={isChecked('hospital')}
+                    onChange={(e) => selectAll('hospital', e.target.checked)}
                   />
                 </label>
                 <select
                   id="hospital"
                   className={styles.formControl}
                   multiple
-                  value={selectedHospitals}
-                  onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, opt => opt.value);
-                    setSelectedHospitals(values);
-                  }}
+                  value={getVal('hospital')}
+                  onChange={(e) => handleHospitalChange(getSelectedValues(e))}
                 >
-                  {filteredHospitals.length > 0 ? (
-                    filteredHospitals.map(h => (
-                      <option key={h.id} value={h.id}>{h.name}</option>
-                    ))
-                  ) : (
-                    <option disabled>Selectionnez une commune</option>
-                  )}
+                  {hospitals.map(h => (
+                    <option key={h.id} value={h.id}>{h.name}</option>
+                  ))}
                 </select>
               </div>
             )}
 
             {/* District Quartiers */}
-            {DistrictQuartiers$.length > 0 && (
+            {((DistrictQuartiers$.length > 1 && districtQuartiers.length === 0) || districtQuartiers.length > 1) && (
               <div className={styles.formGroup}>
                 <label htmlFor="district_quartier">
-                  Districts/Quartiers : ({selectedDistrictQuartiers.length}/{filteredDistrictQuartiers.length})
+                  Districts/Quartiers : ({selectedLength('district_quartier')})
                   <input
                     id="all-district_quartier"
                     type="checkbox"
-                    checked={selectedDistrictQuartiers.length === filteredDistrictQuartiers.length && filteredDistrictQuartiers.length > 0}
-                    onChange={(e) => handleSelectAllDistrictQuartiers(e.target.checked)}
+                    checked={isChecked('district_quartier')}
+                    onChange={(e) => selectAll('district_quartier', e.target.checked)}
                   />
                 </label>
                 <select
                   id="district_quartier"
                   className={styles.formControl}
                   multiple
-                  value={selectedDistrictQuartiers}
-                  onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, opt => opt.value);
-                    setSelectedDistrictQuartiers(values);
-                  }}
+                  value={getVal('district_quartier')}
+                  onChange={(e) => handleDistrictQuartierChange(getSelectedValues(e))}
                 >
-                  {filteredDistrictQuartiers.length > 0 ? (
-                    filteredDistrictQuartiers.map(d => (
-                      <option key={d.id} value={d.id}>{d.name}</option>
-                    ))
-                  ) : (
-                    <option disabled>Selectionnez un centre de sante</option>
-                  )}
+                  {districtQuartiers.map(d => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
                 </select>
               </div>
             )}
 
             {/* Recos */}
-            {showRecoLevel && Recos$.length > 0 && (
+            {showRecoLevel && ((Recos$.length > 1 && recos.length === 0) || recos.length > 1) && (
               <div className={styles.formGroup}>
                 <label htmlFor="recos">
-                  Recos : ({selectedRecos.length}/{filteredRecos.length})
+                  Recos : ({selectedLength('recos')})
                   <input
                     id="all-recos"
                     type="checkbox"
-                    checked={selectedRecos.length === filteredRecos.length && filteredRecos.length > 0}
-                    onChange={(e) => handleSelectAllRecos(e.target.checked)}
+                    checked={isChecked('recos')}
+                    onChange={(e) => selectAll('recos', e.target.checked)}
                   />
                 </label>
                 <select
                   id="recos"
                   className={styles.formControl}
                   multiple
-                  value={selectedRecos}
-                  onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, opt => opt.value);
-                    setSelectedRecos(values);
-                  }}
+                  value={getVal('recos')}
+                  onChange={(e) => handleRecosChange(getSelectedValues(e))}
                 >
-                  {filteredRecos.length > 0 ? (
-                    filteredRecos.map(r => (
-                      <option key={r.id} value={r.id}>{r.name}</option>
-                    ))
-                  ) : (
-                    <option disabled>Selectionnez un district/quartier</option>
-                  )}
+                  {recos.map(r => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
                 </select>
               </div>
             )}
@@ -487,8 +684,8 @@ export function OrgUnitsFilter({
                 <select
                   id="year"
                   className={styles.formControl}
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
+                  value={getVal('year')[0] || year$.toString()}
+                  onChange={(e) => initMonths(parseInt(e.target.value))}
                 >
                   {Years$.map(y => (
                     <option key={y} value={y}>{y}</option>
@@ -504,12 +701,12 @@ export function OrgUnitsFilter({
                   Mois :
                   {showMultipleSelectionMonth && (
                     <>
-                      ({selectedMonths.length})
+                      ({selectedLength('months')})
                       <input
                         id="all-months"
                         type="checkbox"
-                        checked={selectedMonths.length === Months$.length && Months$.length > 0}
-                        onChange={(e) => handleSelectAllMonths(e.target.checked)}
+                        checked={isChecked('months')}
+                        onChange={(e) => selectAll('months', e.target.checked)}
                       />
                     </>
                   )}
@@ -518,13 +715,12 @@ export function OrgUnitsFilter({
                   id="months"
                   className={styles.formControl}
                   multiple={showMultipleSelectionMonth}
-                  value={showMultipleSelectionMonth ? selectedMonths : selectedMonths[0]}
+                  value={showMultipleSelectionMonth ? getVal('months') : getVal('months')[0]}
                   onChange={(e) => {
                     if (showMultipleSelectionMonth) {
-                      const values = Array.from(e.target.selectedOptions, opt => opt.value);
-                      setSelectedMonths(values);
+                      setMultipleValues('months', getSelectedValues(e));
                     } else {
-                      setSelectedMonths([e.target.value]);
+                      setMultipleValues('months', [e.target.value]);
                     }
                   }}
                 >

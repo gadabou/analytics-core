@@ -1,5 +1,16 @@
 import { Database } from '@/utils/Database';
 import type { LoginCredentials, LoginResponse, User, ChangePasswordPayload } from '@/types';
+import {
+  COUNTRIES,
+  REGIONS,
+  PREFECTURES,
+  COMMUNES,
+  HOSPITALS,
+  DISTRICT_QUARTIERS,
+  VILLAGE_SECTEURS,
+  CHWS,
+  RECOS,
+} from '@/utils/TestData';
 
 // Type pour l'utilisateur stocké en base
 interface StoredUser {
@@ -98,15 +109,15 @@ function toFullUser(stored: StoredUser, token: string): User {
       isDeleted: false,
       deletedAt: null,
     }],
-    countries: [],
-    regions: [],
-    prefectures: [],
-    communes: [],
-    hospitals: [],
-    districtQuartiers: [],
-    villageSecteurs: [],
-    chws: [],
-    recos: [],
+    countries: COUNTRIES,
+    regions: REGIONS,
+    prefectures: PREFECTURES,
+    communes: COMMUNES,
+    hospitals: HOSPITALS,
+    districtQuartiers: DISTRICT_QUARTIERS,
+    villageSecteurs: VILLAGE_SECTEURS,
+    chws: CHWS,
+    recos: RECOS,
     role: {
       isSuperUser: stored.username === 'admin',
       canUseOfflineMode: true,
