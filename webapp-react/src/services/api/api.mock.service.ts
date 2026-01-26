@@ -16,6 +16,8 @@ import {
   ROLES,
   AUTHORIZATIONS,
   ROUTES,
+  ORGANIZATIONS,
+  PERMISSIONS,
   generateRecoPerformanceDashboard,
   generateVaccinationDashboard,
   generateActiveRecoDashboard,
@@ -29,6 +31,7 @@ import {
   generateRecoMegSituationReport,
   initializeTestData,
 } from '@/utils/TestData';
+import type { Organization, Permission, ApiToken } from '@/utils/TestData';
 
 // Initialiser les données
 initializeTestData();
@@ -60,7 +63,27 @@ export const AuthApiMock = {
 
   register: async (user: Record<string, unknown>) => {
     await delay(400);
-    const newUser = db.create('users', user);
+    const userId = typeof user.id === 'string' ? user.id : `user-${Date.now()}`;
+    const newUser = db.create('users', {
+      ...user,
+      id: userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isDeleted: false,
+    });
+    return success(newUser, 'Utilisateur créé');
+  },
+
+  createUser: async (user: Record<string, unknown>) => {
+    await delay(400);
+    const userId = typeof user.id === 'string' ? user.id : `user-${Date.now()}`;
+    const newUser = db.create('users', {
+      ...user,
+      id: userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isDeleted: false,
+    });
     return success(newUser, 'Utilisateur créé');
   },
 
@@ -100,18 +123,30 @@ export const AuthApiMock = {
 
   getRoles: async () => {
     await delay(200);
-    return success(ROLES);
+    // Récupérer les rôles de la base de données locale
+    const { items } = db.list('roles');
+    return success(items.length > 0 ? items : ROLES);
   },
 
   createRole: async (role: Record<string, unknown>) => {
     await delay(300);
-    const newRole = db.create('roles', role);
+    const roleId = typeof role.id === 'string' ? role.id : `role-${Date.now()}`;
+    const newRole = db.create('roles', {
+      ...role,
+      id: roleId,
+      createdAt: new Date().toISOString(),
+      isDeleted: false,
+      deletedAt: null,
+    });
     return success(newRole, 'Rôle créé');
   },
 
   updateRole: async (role: Record<string, unknown>) => {
     await delay(300);
-    const updated = db.update('roles', role.id as string, role);
+    const updated = db.update('roles', role.id as string, {
+      ...role,
+      updatedAt: new Date().toISOString(),
+    });
     return success(updated, 'Rôle mis à jour');
   },
 
@@ -634,20 +669,70 @@ export const SurveyApiMock = {
 export const AdminApiMock = {
   getApiTokens: async () => {
     await delay(300);
-    return success([
-      { id: '1', token: 'tok_xxx...xxx', isActive: true, createdAt: '2024-01-01' },
-      { id: '2', token: 'tok_yyy...yyy', isActive: false, createdAt: '2024-02-01' },
-    ]);
+    const { items } = db.list<ApiToken>('api_tokens');
+    return success(items);
   },
 
-  manageApiToken: async (_params: { action: string; id?: string; token?: string; isActive?: boolean }) => {
+  manageApiToken: async (params: { action: string; id?: string; token?: string; isActive?: boolean }) => {
     await delay(300);
-    return success(null, 'Action effectuée');
+    const { action, id, token, isActive } = params;
+
+    switch (action) {
+      case 'create': {
+        const newToken = db.create<ApiToken>('api_tokens', {
+          id: `token-${Date.now()}`,
+          token: token ?? '',
+          isActive: isActive ?? true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+        return success(newToken, 'Token créé');
+      }
+      case 'update': {
+        if (!id) return success(null, 'ID requis');
+        const updated = db.update<ApiToken>('api_tokens', id, {
+          token,
+          isActive,
+          updatedAt: new Date().toISOString(),
+        });
+        return success(updated, 'Token mis à jour');
+      }
+      case 'delete': {
+        if (!id) return success(null, 'ID requis');
+        db.delete('api_tokens', id);
+        return success(null, 'Token supprimé');
+      }
+      case 'list':
+      default: {
+        const { items } = db.list<ApiToken>('api_tokens');
+        return success(items);
+      }
+    }
   },
 
   syncDatabase: async () => {
     await delay(1000);
     return success(null, 'Synchronisation terminée');
+  },
+
+  testDatabaseConnection: async (_params: {
+    connectionName?: string;
+    databaseName: string;
+    username: string;
+    password?: string;
+    host: string;
+    port: string;
+    type: string;
+    ssh?: {
+      host?: string;
+      port?: string;
+      username?: string;
+      password?: string;
+      key?: string;
+    } | null;
+  }) => {
+    await delay(600);
+    return success({ message: 'Connexion établie avec succès' });
   },
 
   rebuildIndexes: async () => {
@@ -719,6 +804,87 @@ export const AdminApiMock = {
 };
 
 // ============================================
+// ORGANIZATIONS API MOCK
+// ============================================
+export const OrganizationsApiMock = {
+  getOrganizations: async () => {
+    await delay(200);
+    const { items } = db.list<Organization>('organizations');
+    return success(items.length > 0 ? items : ORGANIZATIONS);
+  },
+
+  createOrganization: async (org: { name: string; description?: string }) => {
+    await delay(300);
+    const newOrg = db.create<Organization>('organizations', {
+      id: `org-${Date.now()}`,
+      name: org.name,
+      description: org.description,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isActive: true,
+    });
+    return success(newOrg, 'Organisation créée');
+  },
+
+  updateOrganization: async (org: { id: string; name?: string; description?: string; isActive?: boolean }) => {
+    await delay(300);
+    const updated = db.update<Organization>('organizations', org.id, {
+      ...org,
+      updatedAt: new Date().toISOString(),
+    });
+    return success(updated, 'Organisation mise à jour');
+  },
+
+  deleteOrganization: async (id: string) => {
+    await delay(300);
+    db.delete('organizations', id);
+    return success(null, 'Organisation supprimée');
+  },
+};
+
+// ============================================
+// PERMISSIONS API MOCK
+// ============================================
+export const PermissionsApiMock = {
+  getPermissions: async () => {
+    await delay(200);
+    const { items } = db.list<Permission>('permissions');
+    return success(items.length > 0 ? items : PERMISSIONS);
+  },
+
+  createPermission: async (perm: { name: string; description?: string; canCreate: boolean; canRead: boolean; canUpdate: boolean; canDelete: boolean }) => {
+    await delay(300);
+    const newPerm = db.create<Permission>('permissions', {
+      id: `perm-${Date.now()}`,
+      name: perm.name,
+      description: perm.description,
+      canCreate: perm.canCreate,
+      canRead: perm.canRead,
+      canUpdate: perm.canUpdate,
+      canDelete: perm.canDelete,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    return success(newPerm, 'Permission créée');
+  },
+
+  updatePermission: async (perm: { id: string; name?: string; description?: string; canCreate?: boolean; canRead?: boolean; canUpdate?: boolean; canDelete?: boolean }) => {
+    await delay(300);
+    const updated = db.update<Permission>('permissions', perm.id, {
+      ...perm,
+      updatedAt: new Date().toISOString(),
+    });
+    return success(updated, 'Permission mise à jour');
+  },
+
+  deletePermission: async (id: string) => {
+    await delay(300);
+    db.delete('permissions', id);
+    return success(null, 'Permission supprimée');
+  },
+};
+
+// ============================================
 // EXPORT MOCK APIs
 // ============================================
 export const ApiMock = {
@@ -734,6 +900,8 @@ export const ApiMock = {
   migrations: MigrationsApiMock,
   survey: SurveyApiMock,
   admin: AdminApiMock,
+  organizations: OrganizationsApiMock,
+  permissions: PermissionsApiMock,
 };
 
 export default ApiMock;

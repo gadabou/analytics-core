@@ -86,6 +86,22 @@ export function AppRoutes() {
             }
           />
           <Route
+            path="/users/organizations"
+            element={
+              <PrivateRoute>
+                <Pages.OrganizationsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/users/permissions"
+            element={
+              <PrivateRoute>
+                <Pages.PermissionsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/users/roles"
             element={
               <PrivateRoute>

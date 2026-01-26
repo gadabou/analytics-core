@@ -211,6 +211,99 @@ export const ROLES: Roles[] = [
 ];
 
 // ============================================================================
+// ORGANIZATIONS
+// ============================================================================
+export interface Organization {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
+}
+
+export const ORGANIZATIONS: Organization[] = [
+  {
+    id: 'org-1',
+    name: 'Kendeya Analytics',
+    description: 'Organisation principale',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    isActive: true,
+  },
+  {
+    id: 'org-2',
+    name: 'Ministère de la Santé',
+    description: 'Ministère de la Santé de Guinée',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    isActive: true,
+  },
+];
+
+// ============================================================================
+// PERMISSIONS
+// ============================================================================
+export interface Permission {
+  id: string;
+  name: string;
+  description?: string;
+  canCreate: boolean;
+  canRead: boolean;
+  canUpdate: boolean;
+  canDelete: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const PERMISSIONS: Permission[] = [
+  {
+    id: 'perm-1',
+    name: 'manage_users',
+    description: 'Gérer les utilisateurs',
+    canCreate: true,
+    canRead: true,
+    canUpdate: true,
+    canDelete: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'perm-2',
+    name: 'view_reports',
+    description: 'Voir les rapports',
+    canCreate: false,
+    canRead: true,
+    canUpdate: false,
+    canDelete: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'perm-3',
+    name: 'validate_data',
+    description: 'Valider les données',
+    canCreate: false,
+    canRead: true,
+    canUpdate: true,
+    canDelete: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
+
+// ============================================================================
+// API TOKENS
+// ============================================================================
+export interface ApiToken {
+  id: string;
+  token: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -1051,6 +1144,23 @@ export function initializeTestData(): void {
   if (db.count('routes') === 0) {
     ROUTES.forEach((route, i) => db.create<Routes>('routes', { id: `route-${i}`, ...route }));
     console.log('[TestData] Routes créées:', ROUTES.length);
+  }
+
+  // Organizations
+  if (db.count('organizations') === 0) {
+    db.createMany('organizations', ORGANIZATIONS);
+    console.log('[TestData] Organisations créées:', ORGANIZATIONS.length);
+  }
+
+  // Permissions
+  if (db.count('permissions') === 0) {
+    db.createMany('permissions', PERMISSIONS);
+    console.log('[TestData] Permissions créées:', PERMISSIONS.length);
+  }
+
+  // API Tokens (collection vide par défaut)
+  if (db.count('api_tokens') === 0) {
+    console.log('[TestData] Collection api_tokens initialisée (vide)');
   }
 
   console.log('[TestData] Initialisation terminée!');

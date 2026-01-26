@@ -188,7 +188,7 @@ export function useUsers() {
 
     try {
       const isUpdate = !!data.id;
-      const apiCall = isUpdate ? AuthApi.updateUser(data as unknown as Record<string, unknown>) : AuthApi.register(data as unknown as Record<string, unknown>);
+      const apiCall = isUpdate ? AuthApi.updateUser(data as unknown as Record<string, unknown>) : AuthApi.createUser(data as unknown as Record<string, unknown>);
       const response = await apiCall;
 
       if (response.status === 200) {

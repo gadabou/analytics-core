@@ -1,4 +1,5 @@
 export { ApiAccessTab } from './ApiAccessTab';
+export { DatabaseConnectionTab } from './DatabaseConnectionTab';
 export { DatabaseActionsTab } from './DatabaseActionsTab';
 export { DeleteCouchdbTab } from './DeleteCouchdbTab';
 export { PdfGeneratorTab } from './PdfGeneratorTab';

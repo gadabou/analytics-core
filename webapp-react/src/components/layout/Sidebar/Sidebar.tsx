@@ -7,7 +7,9 @@ import {
   FileText,
   Map,
   Users,
+  Building2,
   Shield,
+  ShieldCheck,
   BookOpen,
   Gauge,
   Activity,
@@ -75,6 +77,8 @@ const sidebarItems: SidebarItem[] = [
     icon: <Users size={20} />,
     children: [
       { path: '/users/list', label: 'Liste', icon: <Users size={18} /> },
+      { path: '/users/organizations', label: 'Organisations', icon: <Building2 size={18} /> },
+      { path: '/users/permissions', label: 'Permissions', icon: <ShieldCheck size={18} /> },
       { path: '/users/roles', label: 'Rôles', icon: <Shield size={18} /> },
     ],
   },

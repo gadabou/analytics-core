@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Key,
+  Plug,
   Database,
   Trash2,
   FileText,
@@ -10,6 +11,7 @@ import {
 } from 'lucide-react';
 import { PageWrapper } from '@components/layout';
 import { ApiAccessTab } from '../components/ApiAccessTab';
+import { DatabaseConnectionTab } from '../components/DatabaseConnectionTab';
 import { DatabaseActionsTab } from '../components/DatabaseActionsTab';
 import { DeleteCouchdbTab } from '../components/DeleteCouchdbTab';
 import { PdfGeneratorTab } from '../components/PdfGeneratorTab';
@@ -17,7 +19,14 @@ import { SignatureTab } from '../components/SignatureTab';
 import { TruncateDatabaseTab } from '../components/TruncateDatabaseTab';
 import styles from './AdminPage.module.css';
 
-type AdminTabType = 'API_ACCESS' | 'DATABASE' | 'DELETE_COUCHDB' | 'PDF_GENERATOR' | 'SIGNATURE' | 'TRUNCATE_DATABASE';
+type AdminTabType =
+  | 'API_ACCESS'
+  | 'DB_CONNECTION'
+  | 'DATABASE'
+  | 'DELETE_COUCHDB'
+  | 'PDF_GENERATOR'
+  | 'SIGNATURE'
+  | 'TRUNCATE_DATABASE';
 
 interface Tab {
   id: AdminTabType;
@@ -29,6 +38,7 @@ interface Tab {
 
 const TABS: Tab[] = [
   { id: 'API_ACCESS', label: "API d'accès", icon: <Key size={18} />, color: '#3b82f6' },
+  { id: 'DB_CONNECTION', label: 'Connexion BD', icon: <Plug size={18} />, color: '#0ea5e9' },
   { id: 'DATABASE', label: 'Base de données', icon: <Database size={18} />, color: '#22c55e' },
   { id: 'DELETE_COUCHDB', label: 'Supprimer CouchDB', icon: <Trash2 size={18} />, color: '#f59e0b', danger: true },
   { id: 'PDF_GENERATOR', label: 'Générateur PDF', icon: <FileText size={18} />, color: '#8b5cf6' },
@@ -48,6 +58,8 @@ export default function AdminPage() {
       switch (currentTab) {
         case 'API_ACCESS':
           return <ApiAccessTab />;
+        case 'DB_CONNECTION':
+          return <DatabaseConnectionTab />;
         case 'DATABASE':
           return <DatabaseActionsTab />;
         case 'DELETE_COUCHDB':

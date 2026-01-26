@@ -21,6 +21,8 @@ import {
   MigrationsApiMock,
   SurveyApiMock,
   AdminApiMock,
+  OrganizationsApiMock,
+  PermissionsApiMock,
 } from './api.mock.service';
 
 // ============================================
@@ -144,6 +146,11 @@ const _RealAuthApi = {
 
   register: async (user: Record<string, unknown>) => {
     const response = await axiosInstance.post<ApiResponse>('/auth-user/register', withUserId(user));
+    return response.data;
+  },
+
+  createUser: async (user: Record<string, unknown>) => {
+    const response = await axiosInstance.post<ApiResponse>('/auth-user/create-user', withUserId(user));
     return response.data;
   },
 
@@ -601,6 +608,26 @@ const _RealAdminApi = {
     return response.data;
   },
 
+  testDatabaseConnection: async (params: {
+    connectionName?: string;
+    databaseName: string;
+    username: string;
+    password?: string;
+    host: string;
+    port: string;
+    type: string;
+    ssh?: {
+      host?: string;
+      port?: string;
+      username?: string;
+      password?: string;
+      key?: string;
+    } | null;
+  }) => {
+    const response = await axiosInstance.post<ApiResponse>('/database/connection/test', withUserId(params));
+    return response.data;
+  },
+
   rebuildIndexes: async () => {
     const response = await axiosInstance.post<ApiResponse>('/database/rebuild-indexes', withUserId({}));
     return response.data;
@@ -662,6 +689,56 @@ const _RealAdminApi = {
 };
 
 // ============================================
+// ORGANIZATIONS API (Version réelle - backend)
+// ============================================
+const _RealOrganizationsApi = {
+  getOrganizations: async () => {
+    const response = await axiosInstance.post<ApiResponse>('/organizations/list', withUserId({}));
+    return response.data;
+  },
+
+  createOrganization: async (org: { name: string; description?: string }) => {
+    const response = await axiosInstance.post<ApiResponse>('/organizations/create', withUserId(org));
+    return response.data;
+  },
+
+  updateOrganization: async (org: { id: string; name?: string; description?: string; isActive?: boolean }) => {
+    const response = await axiosInstance.post<ApiResponse>('/organizations/update', withUserId(org));
+    return response.data;
+  },
+
+  deleteOrganization: async (id: string) => {
+    const response = await axiosInstance.post<ApiResponse>('/organizations/delete', withUserId({ id }));
+    return response.data;
+  },
+};
+
+// ============================================
+// PERMISSIONS API (Version réelle - backend)
+// ============================================
+const _RealPermissionsApi = {
+  getPermissions: async () => {
+    const response = await axiosInstance.post<ApiResponse>('/permissions/list', withUserId({}));
+    return response.data;
+  },
+
+  createPermission: async (perm: { name: string; description?: string; canCreate: boolean; canRead: boolean; canUpdate: boolean; canDelete: boolean }) => {
+    const response = await axiosInstance.post<ApiResponse>('/permissions/create', withUserId(perm));
+    return response.data;
+  },
+
+  updatePermission: async (perm: { id: string; name?: string; description?: string; canCreate?: boolean; canRead?: boolean; canUpdate?: boolean; canDelete?: boolean }) => {
+    const response = await axiosInstance.post<ApiResponse>('/permissions/update', withUserId(perm));
+    return response.data;
+  },
+
+  deletePermission: async (id: string) => {
+    const response = await axiosInstance.post<ApiResponse>('/permissions/delete', withUserId({ id }));
+    return response.data;
+  },
+};
+
+// ============================================
 // EXPORT ALL APIs - Utilise Mock si activé
 // ============================================
 
@@ -678,6 +755,8 @@ export const ConfigApi = USE_MOCK_API ? ConfigApiMock : _RealConfigApi;
 export const MigrationsApi = USE_MOCK_API ? MigrationsApiMock : _RealMigrationsApi;
 export const SurveyApi = USE_MOCK_API ? SurveyApiMock : _RealSurveyApi;
 export const AdminApi = USE_MOCK_API ? AdminApiMock : _RealAdminApi;
+export const OrganizationsApi = USE_MOCK_API ? OrganizationsApiMock : _RealOrganizationsApi;
+export const PermissionsApi = USE_MOCK_API ? PermissionsApiMock : _RealPermissionsApi;
 
 export const Api = {
   auth: AuthApi,
@@ -692,6 +771,8 @@ export const Api = {
   migrations: MigrationsApi,
   survey: SurveyApi,
   admin: AdminApi,
+  organizations: OrganizationsApi,
+  permissions: PermissionsApi,
 };
 
 export default Api;

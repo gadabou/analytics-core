@@ -16,6 +16,8 @@ export const MapsPage = lazy(() => import('@features/maps/pages/MapsPage'));
 
 // Users pages
 export const UsersPage = lazy(() => import('@features/users/pages/UsersPage'));
+export const OrganizationsPage = lazy(() => import('@features/users/pages/OrganizationsPage'));
+export const PermissionsPage = lazy(() => import('@features/users/pages/PermissionsPage'));
 export const RolesPage = lazy(() => import('@features/users/pages/RolesPage'));
 
 // Admin pages
