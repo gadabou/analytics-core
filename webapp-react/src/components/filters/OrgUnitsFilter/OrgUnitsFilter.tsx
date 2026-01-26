@@ -474,10 +474,30 @@ export function OrgUnitsFilter({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleClose]);
 
-  // Helper to get values from multi-select
-  const getSelectedValues = (e: React.ChangeEvent<HTMLSelectElement>): string[] => {
-    return Array.from(e.target.selectedOptions, opt => opt.value);
-  };
+  const toggleValue = useCallback((
+    cible: 'country' | 'region' | 'prefecture' | 'commune' | 'hospital' | 'district_quartier' | 'recos',
+    id: string
+  ) => {
+    const current = getVal(cible);
+    const next = current.includes(id) ? current.filter(val => val !== id) : [...current, id];
+
+    if (cible === 'country') handleCountryChange(next);
+    if (cible === 'region') handleRegionChange(next);
+    if (cible === 'prefecture') handlePrefectureChange(next);
+    if (cible === 'commune') handleCommuneChange(next);
+    if (cible === 'hospital') handleHospitalChange(next);
+    if (cible === 'district_quartier') handleDistrictQuartierChange(next);
+    if (cible === 'recos') handleRecosChange(next);
+  }, [
+    getVal,
+    handleCountryChange,
+    handleRegionChange,
+    handlePrefectureChange,
+    handleCommuneChange,
+    handleHospitalChange,
+    handleDistrictQuartierChange,
+    handleRecosChange,
+  ]);
 
   if (!isOpen) return null;
 
@@ -503,17 +523,26 @@ export function OrgUnitsFilter({
                     onChange={(e) => selectAll('country', e.target.checked)}
                   />
                 </label>
-                <select
-                  id="country"
-                  className={styles.formControl}
-                  multiple
-                  value={getVal('country')}
-                  onChange={(e) => handleCountryChange(getSelectedValues(e))}
-                >
-                  {countries.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                <div className={styles.optionsContainer}>
+                  <div className={styles.optionsGrid}>
+                    {countries.map(c => {
+                      const isSelected = getVal('country').includes(c.id);
+                      return (
+                        <label
+                          key={c.id}
+                          className={`${styles.optionItem} ${isSelected ? styles.optionItemSelected : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleValue('country', c.id)}
+                          />
+                          <span>{c.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -529,17 +558,26 @@ export function OrgUnitsFilter({
                     onChange={(e) => selectAll('region', e.target.checked)}
                   />
                 </label>
-                <select
-                  id="region"
-                  className={styles.formControl}
-                  multiple
-                  value={getVal('region')}
-                  onChange={(e) => handleRegionChange(getSelectedValues(e))}
-                >
-                  {regions.map(r => (
-                    <option key={r.id} value={r.id}>{r.name}</option>
-                  ))}
-                </select>
+                <div className={styles.optionsContainer}>
+                  <div className={styles.optionsGrid}>
+                    {regions.map(r => {
+                      const isSelected = getVal('region').includes(r.id);
+                      return (
+                        <label
+                          key={r.id}
+                          className={`${styles.optionItem} ${isSelected ? styles.optionItemSelected : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleValue('region', r.id)}
+                          />
+                          <span>{r.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -555,17 +593,26 @@ export function OrgUnitsFilter({
                     onChange={(e) => selectAll('prefecture', e.target.checked)}
                   />
                 </label>
-                <select
-                  id="prefecture"
-                  className={styles.formControl}
-                  multiple
-                  value={getVal('prefecture')}
-                  onChange={(e) => handlePrefectureChange(getSelectedValues(e))}
-                >
-                  {prefectures.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
+                <div className={styles.optionsContainer}>
+                  <div className={styles.optionsGrid}>
+                    {prefectures.map(p => {
+                      const isSelected = getVal('prefecture').includes(p.id);
+                      return (
+                        <label
+                          key={p.id}
+                          className={`${styles.optionItem} ${isSelected ? styles.optionItemSelected : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleValue('prefecture', p.id)}
+                          />
+                          <span>{p.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -581,17 +628,26 @@ export function OrgUnitsFilter({
                     onChange={(e) => selectAll('commune', e.target.checked)}
                   />
                 </label>
-                <select
-                  id="commune"
-                  className={styles.formControl}
-                  multiple
-                  value={getVal('commune')}
-                  onChange={(e) => handleCommuneChange(getSelectedValues(e))}
-                >
-                  {communes.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                <div className={styles.optionsContainer}>
+                  <div className={styles.optionsGrid}>
+                    {communes.map(c => {
+                      const isSelected = getVal('commune').includes(c.id);
+                      return (
+                        <label
+                          key={c.id}
+                          className={`${styles.optionItem} ${isSelected ? styles.optionItemSelected : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleValue('commune', c.id)}
+                          />
+                          <span>{c.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -607,17 +663,26 @@ export function OrgUnitsFilter({
                     onChange={(e) => selectAll('hospital', e.target.checked)}
                   />
                 </label>
-                <select
-                  id="hospital"
-                  className={styles.formControl}
-                  multiple
-                  value={getVal('hospital')}
-                  onChange={(e) => handleHospitalChange(getSelectedValues(e))}
-                >
-                  {hospitals.map(h => (
-                    <option key={h.id} value={h.id}>{h.name}</option>
-                  ))}
-                </select>
+                <div className={styles.optionsContainer}>
+                  <div className={styles.optionsGrid}>
+                    {hospitals.map(h => {
+                      const isSelected = getVal('hospital').includes(h.id);
+                      return (
+                        <label
+                          key={h.id}
+                          className={`${styles.optionItem} ${isSelected ? styles.optionItemSelected : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleValue('hospital', h.id)}
+                          />
+                          <span>{h.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -633,17 +698,26 @@ export function OrgUnitsFilter({
                     onChange={(e) => selectAll('district_quartier', e.target.checked)}
                   />
                 </label>
-                <select
-                  id="district_quartier"
-                  className={styles.formControl}
-                  multiple
-                  value={getVal('district_quartier')}
-                  onChange={(e) => handleDistrictQuartierChange(getSelectedValues(e))}
-                >
-                  {districtQuartiers.map(d => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
-                  ))}
-                </select>
+                <div className={styles.optionsContainer}>
+                  <div className={styles.optionsGrid}>
+                    {districtQuartiers.map(d => {
+                      const isSelected = getVal('district_quartier').includes(d.id);
+                      return (
+                        <label
+                          key={d.id}
+                          className={`${styles.optionItem} ${isSelected ? styles.optionItemSelected : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleValue('district_quartier', d.id)}
+                          />
+                          <span>{d.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -659,17 +733,26 @@ export function OrgUnitsFilter({
                     onChange={(e) => selectAll('recos', e.target.checked)}
                   />
                 </label>
-                <select
-                  id="recos"
-                  className={styles.formControl}
-                  multiple
-                  value={getVal('recos')}
-                  onChange={(e) => handleRecosChange(getSelectedValues(e))}
-                >
-                  {recos.map(r => (
-                    <option key={r.id} value={r.id}>{r.name}</option>
-                  ))}
-                </select>
+                <div className={styles.optionsContainer}>
+                  <div className={styles.optionsGrid}>
+                    {recos.map(r => {
+                      const isSelected = getVal('recos').includes(r.id);
+                      return (
+                        <label
+                          key={r.id}
+                          className={`${styles.optionItem} ${isSelected ? styles.optionItemSelected : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleValue('recos', r.id)}
+                          />
+                          <span>{r.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 

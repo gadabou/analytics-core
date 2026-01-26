@@ -148,6 +148,49 @@
   cursor: not-allowed;
 }
 
+.optionsContainer {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.optionItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  background-color: #ffffff;
+  cursor: pointer;
+  user-select: none;
+}
+
+.optionItem input {
+  margin: 0;
+}
+
+.optionItemSelected {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  color: white;
+}
+
+.optionItemSelected input {
+  accent-color: white;
+}
+
 /* Buttons */
 .btn {
   padding: 0.75rem 1.5rem;
@@ -223,6 +266,16 @@
 
   .formControl[multiple] {
     min-height: 100px;
+  }
+
+  .optionsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .optionsGrid {
+    grid-template-columns: 1fr;
   }
 }
 
