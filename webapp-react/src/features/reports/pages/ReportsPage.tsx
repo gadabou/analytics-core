@@ -17,7 +17,7 @@ import { Card, CardBody } from '@components/ui';
 import { Button } from '@components/ui/Button/Button';
 import { GraduationLoader } from '@components/loaders/GraduationLoader/GraduationLoader';
 import { useReports } from '@/hooks/useReports';
-import { ReportFilters } from './components/ReportFilters';
+import { ReportFilters } from '@/components/filters/ReportFilters';
 import { ReportTable } from './components/ReportTable';
 import type { ReportType } from '@/types/reports.types';
 import type { FilterParams } from '@/stores/reports.store';
@@ -108,7 +108,6 @@ export default function ReportsPage() {
       <ReportFilters
         onFilter={handleFilter}
         isLoading={currentStatus.isLoading}
-        initialValues={filters || undefined}
       />
 
       {/* Actions Bar */}

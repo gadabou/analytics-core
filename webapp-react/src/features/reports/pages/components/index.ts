@@ -1,2 +1,2 @@
-export { ReportFilters } from './ReportFilters';
+export {};
 export { ReportTable } from './ReportTable';
