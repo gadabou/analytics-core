@@ -29,7 +29,7 @@ import {
   FileText,
   LayoutDashboard,
 } from 'lucide-react';
-import { useNotification } from '@stores/notificationStore';
+import { useNotification } from '@/hooks/useNotification';
 import {
   Chart,
   CHART_COLORS,
@@ -395,7 +395,7 @@ const vizStyles: Record<string, string> = {
 // ============================================================================
 
 export function VisualizationsTab() {
-  const { showNotification } = useNotification();
+  const { showSuccess } = useNotification();
 
   // State
   const [visualizationType, setVisualizationType] = useState<VisualizationType>('dashboard');
@@ -517,12 +517,8 @@ export function VisualizationsTab() {
     };
 
     console.log('Saving visualization:', config);
-    showNotification({
-      type: 'success',
-      message: 'Visualisation sauvegardée',
-      description: `"${name}" a été créée avec succès`,
-    });
-  }, [name, description, visualizationType, chartType, columnItems, rowItems, filterItems, options, showNotification]);
+    showSuccess(`Visualisation sauvegardée : "${name}"`);
+  }, [name, description, visualizationType, chartType, columnItems, rowItems, filterItems, options, showSuccess]);
 
   const handleReset = useCallback(() => {
     setName('Nouvelle visualisation');
