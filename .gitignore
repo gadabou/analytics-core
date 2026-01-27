@@ -17,4 +17,5 @@ webapp/venv
 webapp/src/copy
 api/src/copy
 pythons
+app_data
 
