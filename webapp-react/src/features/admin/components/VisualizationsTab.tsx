@@ -105,6 +105,12 @@ interface VisualizationOptions {
   colors?: string[];
 }
 
+interface StoredVisualization extends VisualizationConfig {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ============================================================================
 // CHART TYPE OPTIONS
 // ============================================================================
@@ -372,6 +378,7 @@ export function VisualizationsTab() {
   const [indicators, setIndicators] = useState<DimensionItem[]>([]);
   const [periods, setPeriods] = useState<DimensionItem[]>([]);
   const [orgUnits, setOrgUnits] = useState<DimensionItem[]>([]);
+  const [savedVisualizations, setSavedVisualizations] = useState<StoredVisualization[]>([]);
 
   // Options
   const [options, setOptions] = useState<VisualizationOptions>({
@@ -383,6 +390,14 @@ export function VisualizationsTab() {
     stacked: false,
     animation: true,
   });
+
+  const loadSavedVisualizations = useCallback(() => {
+    const { items } = db.list<StoredVisualization>('visualizations', {
+      sortBy: 'updatedAt',
+      sortDir: 'desc',
+    });
+    setSavedVisualizations(items);
+  }, []);
 
   useEffect(() => {
     try {
@@ -396,11 +411,12 @@ export function VisualizationsTab() {
       setIndicators(indicatorItems);
       setPeriods(periodItems);
       setOrgUnits(orgUnitItems);
+      loadSavedVisualizations();
     } catch (error) {
       console.error('[VisualizationsTab] Failed to load local data', error);
       showError("Impossible de charger les données locales pour les visualisations.");
     }
-  }, [showError]);
+  }, [loadSavedVisualizations, showError]);
 
   // Get all items for lookup
   const allItems = useMemo(() => [
@@ -409,6 +425,11 @@ export function VisualizationsTab() {
     ...periods,
     ...orgUnits,
   ], [dataElements, indicators, periods, orgUnits]);
+
+  const filteredSavedVisualizations = useMemo(
+    () => savedVisualizations.filter((viz) => viz.type === visualizationType),
+    [savedVisualizations, visualizationType]
+  );
 
   // Generate preview data based on selections
   const previewData = useMemo((): ChartDataItem[] => {
@@ -494,8 +515,24 @@ export function VisualizationsTab() {
     };
 
     console.log('Saving visualization:', config);
+    const now = new Date().toISOString();
+    const storedVisualization: StoredVisualization = {
+      id: `viz-${Date.now()}`,
+      createdAt: now,
+      updatedAt: now,
+      ...config,
+    };
+
+    try {
+      db.create<StoredVisualization>('visualizations', storedVisualization);
+      setSavedVisualizations((prev) => [storedVisualization, ...prev]);
+    } catch (error) {
+      console.error('[VisualizationsTab] Failed to save visualization', error);
+      showError('Impossible de sauvegarder la visualisation.');
+      return;
+    }
     showSuccess(`Visualisation sauvegardée : "${name}"`);
-  }, [name, description, visualizationType, chartType, columnItems, rowItems, filterItems, options, showSuccess]);
+  }, [name, description, visualizationType, chartType, columnItems, rowItems, filterItems, options, showSuccess, showError]);
 
   const handleReset = useCallback(() => {
     setName('Nouvelle visualisation');
@@ -694,6 +731,50 @@ export function VisualizationsTab() {
 
         .viz-type-option-active span {
           color: #3b82f6;
+        }
+
+        .viz-saved-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          padding: 1rem;
+        }
+
+        .viz-saved-item {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          padding: 0.75rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 0.5rem;
+          background: #ffffff;
+        }
+
+        .viz-saved-item-title {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #1e293b;
+        }
+
+        .viz-saved-item-description {
+          font-size: 0.8125rem;
+          color: #64748b;
+        }
+
+        .viz-saved-item-meta {
+          display: flex;
+          gap: 0.5rem;
+          font-size: 0.75rem;
+          color: #94a3b8;
+        }
+
+        .viz-saved-empty {
+          padding: 0.75rem;
+          font-size: 0.8125rem;
+          color: #94a3b8;
+          border: 1px dashed #e2e8f0;
+          border-radius: 0.5rem;
+          text-align: center;
         }
 
         .viz-chart-type-grid {
@@ -1140,6 +1221,34 @@ export function VisualizationsTab() {
                   <FileText size={24} />
                   <span>Rapport</span>
                 </button>
+              </div>
+            </div>
+
+            <div className="viz-section">
+              <div className="viz-section-title">
+                <Layers size={18} />
+                Visualisations sauvegardées
+              </div>
+              <div className="viz-saved-list">
+                {filteredSavedVisualizations.length === 0 ? (
+                  <div className="viz-saved-empty">
+                    Aucune visualisation pour ce type.
+                  </div>
+                ) : (
+                  filteredSavedVisualizations.map((viz) => (
+                    <div key={viz.id} className="viz-saved-item">
+                      <div className="viz-saved-item-title">{viz.name}</div>
+                      {viz.description && (
+                        <div className="viz-saved-item-description">{viz.description}</div>
+                      )}
+                      <div className="viz-saved-item-meta">
+                        <span>{viz.chartType}</span>
+                        <span>•</span>
+                        <span>{new Date(viz.updatedAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
