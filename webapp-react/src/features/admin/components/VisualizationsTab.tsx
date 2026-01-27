@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   BarChart3,
   LineChart,
@@ -30,6 +30,11 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { useNotification } from '@/hooks/useNotification';
+import {
+  db,
+  initializeTestData,
+  type VisualizationDimensionItem,
+} from '@/utils/TestData';
 import {
   Chart,
   CHART_COLORS,
@@ -99,58 +104,6 @@ interface VisualizationOptions {
   animation: boolean;
   colors?: string[];
 }
-
-// ============================================================================
-// MOCK DATA - Simulated data dimensions (like DHIS2)
-// ============================================================================
-
-const MOCK_DATA_ELEMENTS: DimensionItem[] = [
-  { id: 'de1', name: 'Consultations totales', code: 'CONS_TOTAL' },
-  { id: 'de2', name: 'Consultations prénatales', code: 'CPN' },
-  { id: 'de3', name: 'Vaccinations complètes', code: 'VAC_COMP' },
-  { id: 'de4', name: 'Naissances assistées', code: 'NAIS_ASST' },
-  { id: 'de5', name: 'Cas de paludisme', code: 'PALU_CAS' },
-  { id: 'de6', name: 'Cas de diarrhée', code: 'DIAR_CAS' },
-  { id: 'de7', name: 'Enfants malnutris', code: 'MALNUT' },
-  { id: 'de8', name: 'Décès maternels', code: 'DEC_MAT' },
-  { id: 'de9', name: 'Décès infantiles', code: 'DEC_INF' },
-  { id: 'de10', name: 'Accouchements', code: 'ACCOU' },
-];
-
-const MOCK_INDICATORS: DimensionItem[] = [
-  { id: 'ind1', name: 'Taux de couverture vaccinale', code: 'TX_VAC' },
-  { id: 'ind2', name: 'Taux de consultation prénatale', code: 'TX_CPN' },
-  { id: 'ind3', name: 'Taux de mortalité infantile', code: 'TX_MORT_INF' },
-  { id: 'ind4', name: 'Taux de mortalité maternelle', code: 'TX_MORT_MAT' },
-  { id: 'ind5', name: 'Ratio personnel/population', code: 'RATIO_PERS' },
-];
-
-const MOCK_PERIODS: DimensionItem[] = [
-  { id: 'THIS_MONTH', name: 'Ce mois-ci' },
-  { id: 'LAST_MONTH', name: 'Mois dernier' },
-  { id: 'LAST_3_MONTHS', name: '3 derniers mois' },
-  { id: 'LAST_6_MONTHS', name: '6 derniers mois' },
-  { id: 'THIS_YEAR', name: 'Cette année' },
-  { id: 'LAST_YEAR', name: 'Année dernière' },
-  { id: 'LAST_5_YEARS', name: '5 dernières années' },
-  { id: '2024', name: '2024' },
-  { id: '2023', name: '2023' },
-  { id: '2022', name: '2022' },
-  { id: '202401', name: 'Janvier 2024' },
-  { id: '202402', name: 'Février 2024' },
-  { id: '202403', name: 'Mars 2024' },
-];
-
-const MOCK_ORG_UNITS: DimensionItem[] = [
-  { id: 'ou1', name: 'Région de Conakry', code: 'CKY' },
-  { id: 'ou2', name: 'Région de Kindia', code: 'KND' },
-  { id: 'ou3', name: 'Région de Boké', code: 'BOK' },
-  { id: 'ou4', name: 'Région de Mamou', code: 'MAM' },
-  { id: 'ou5', name: 'Région de Labé', code: 'LAB' },
-  { id: 'ou6', name: 'Région de Faranah', code: 'FAR' },
-  { id: 'ou7', name: 'Région de Kankan', code: 'KAN' },
-  { id: 'ou8', name: 'Région de Nzérékoré', code: 'NZR' },
-];
 
 // ============================================================================
 // CHART TYPE OPTIONS
@@ -395,7 +348,7 @@ const vizStyles: Record<string, string> = {
 // ============================================================================
 
 export function VisualizationsTab() {
-  const { showSuccess } = useNotification();
+  const { showSuccess, showError } = useNotification();
 
   // State
   const [visualizationType, setVisualizationType] = useState<VisualizationType>('dashboard');
@@ -414,6 +367,12 @@ export function VisualizationsTab() {
   const [rowItems, setRowItems] = useState<string[]>(['de1', 'de2', 'de3']);
   const [filterItems, setFilterItems] = useState<string[]>(['ou1']);
 
+  // Dimension data
+  const [dataElements, setDataElements] = useState<DimensionItem[]>([]);
+  const [indicators, setIndicators] = useState<DimensionItem[]>([]);
+  const [periods, setPeriods] = useState<DimensionItem[]>([]);
+  const [orgUnits, setOrgUnits] = useState<DimensionItem[]>([]);
+
   // Options
   const [options, setOptions] = useState<VisualizationOptions>({
     title: 'Évolution des consultations',
@@ -425,13 +384,31 @@ export function VisualizationsTab() {
     animation: true,
   });
 
+  useEffect(() => {
+    try {
+      initializeTestData();
+      const { items: dataElementItems } = db.list<VisualizationDimensionItem>('visualization_data_elements');
+      const { items: indicatorItems } = db.list<VisualizationDimensionItem>('visualization_indicators');
+      const { items: periodItems } = db.list<VisualizationDimensionItem>('visualization_periods');
+      const { items: orgUnitItems } = db.list<VisualizationDimensionItem>('visualization_org_units');
+
+      setDataElements(dataElementItems);
+      setIndicators(indicatorItems);
+      setPeriods(periodItems);
+      setOrgUnits(orgUnitItems);
+    } catch (error) {
+      console.error('[VisualizationsTab] Failed to load local data', error);
+      showError("Impossible de charger les données locales pour les visualisations.");
+    }
+  }, [showError]);
+
   // Get all items for lookup
   const allItems = useMemo(() => [
-    ...MOCK_DATA_ELEMENTS,
-    ...MOCK_INDICATORS,
-    ...MOCK_PERIODS,
-    ...MOCK_ORG_UNITS,
-  ], []);
+    ...dataElements,
+    ...indicators,
+    ...periods,
+    ...orgUnits,
+  ], [dataElements, indicators, periods, orgUnits]);
 
   // Generate preview data based on selections
   const previewData = useMemo((): ChartDataItem[] => {
@@ -442,8 +419,8 @@ export function VisualizationsTab() {
     if (chartType === 'pie' || chartType === 'donut' || chartType === 'treemap' || chartType === 'funnel' || chartType === 'radialBar') {
       // For pie-like charts, use data items as categories
       return dataItems.slice(0, 6).map((itemId, index) => {
-        const item = MOCK_DATA_ELEMENTS.find(d => d.id === itemId) ||
-                     MOCK_INDICATORS.find(i => i.id === itemId);
+        const item = dataElements.find(d => d.id === itemId) ||
+                     indicators.find(i => i.id === itemId);
         return {
           name: item?.name || itemId,
           value: Math.floor(Math.random() * 500) + 100,
@@ -455,10 +432,10 @@ export function VisualizationsTab() {
     if (chartType === 'radar') {
       // For radar, use org units as subjects
       return selectedOrgUnits.slice(0, 5).map((ouId) => {
-        const ou = MOCK_ORG_UNITS.find(o => o.id === ouId);
+        const ou = orgUnits.find(o => o.id === ouId);
         const entry: ChartDataItem = { subject: ou?.name || ouId };
         dataItems.slice(0, 3).forEach((dataId) => {
-          const dataItem = MOCK_DATA_ELEMENTS.find(d => d.id === dataId);
+          const dataItem = dataElements.find(d => d.id === dataId);
           entry[dataItem?.name || dataId] = Math.floor(Math.random() * 100) + 20;
         });
         return entry;
@@ -480,8 +457,8 @@ export function VisualizationsTab() {
     return monthNames.slice(0, 6).map((month) => {
       const entry: ChartDataItem = { name: month };
       dataItems.slice(0, 4).forEach((dataId) => {
-        const dataItem = MOCK_DATA_ELEMENTS.find(d => d.id === dataId) ||
-                        MOCK_INDICATORS.find(i => i.id === dataId);
+        const dataItem = dataElements.find(d => d.id === dataId) ||
+                        indicators.find(i => i.id === dataId);
         entry[dataItem?.name || dataId] = Math.floor(Math.random() * 300) + 50;
       });
       return entry;
@@ -492,8 +469,8 @@ export function VisualizationsTab() {
   const previewSeries = useMemo(() => {
     const dataItems = [...selectedDataElements, ...selectedIndicators];
     return dataItems.slice(0, 4).map((dataId, index) => {
-      const item = MOCK_DATA_ELEMENTS.find(d => d.id === dataId) ||
-                   MOCK_INDICATORS.find(i => i.id === dataId);
+      const item = dataElements.find(d => d.id === dataId) ||
+                   indicators.find(i => i.id === dataId);
       return {
         dataKey: item?.name || dataId,
         name: item?.name || dataId,
@@ -1198,7 +1175,7 @@ export function VisualizationsTab() {
               <DimensionSelector
                 title="Éléments de données"
                 icon={<Database size={16} />}
-                items={MOCK_DATA_ELEMENTS}
+                items={dataElements}
                 selectedItems={selectedDataElements}
                 onSelectionChange={setSelectedDataElements}
                 searchPlaceholder="Rechercher un élément..."
@@ -1207,7 +1184,7 @@ export function VisualizationsTab() {
               <DimensionSelector
                 title="Indicateurs"
                 icon={<TrendingUp size={16} />}
-                items={MOCK_INDICATORS}
+                items={indicators}
                 selectedItems={selectedIndicators}
                 onSelectionChange={setSelectedIndicators}
                 searchPlaceholder="Rechercher un indicateur..."
@@ -1216,7 +1193,7 @@ export function VisualizationsTab() {
               <DimensionSelector
                 title="Périodes"
                 icon={<Calendar size={16} />}
-                items={MOCK_PERIODS}
+                items={periods}
                 selectedItems={selectedPeriods}
                 onSelectionChange={setSelectedPeriods}
                 searchPlaceholder="Rechercher une période..."
@@ -1225,7 +1202,7 @@ export function VisualizationsTab() {
               <DimensionSelector
                 title="Unités d'organisation"
                 icon={<Building2 size={16} />}
-                items={MOCK_ORG_UNITS}
+                items={orgUnits}
                 selectedItems={selectedOrgUnits}
                 onSelectionChange={setSelectedOrgUnits}
                 searchPlaceholder="Rechercher une unité..."

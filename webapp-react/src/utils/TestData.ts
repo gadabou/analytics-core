@@ -101,6 +101,63 @@ export const VILLAGE_SECTEURS: VillageSecteursMap[] = [
   { id: 'vs-nongo-1', external_id: 'VS004', name: 'Nongo Secteur 1', country_id: 'country-gn', region_id: 'region-conakry', prefecture_id: 'pref-ratoma', commune_id: 'com-nongo', hospital_id: 'hosp-nongo', district_quartier_id: 'dq-nongo' },
 ];
 
+// ============================================================================
+// VISUALIZATION DIMENSIONS
+// ============================================================================
+export interface VisualizationDimensionItem {
+  id: string;
+  name: string;
+  code?: string;
+}
+
+export const VISUALIZATION_DATA_ELEMENTS: VisualizationDimensionItem[] = [
+  { id: 'de1', name: 'Consultations totales', code: 'CONS_TOTAL' },
+  { id: 'de2', name: 'Consultations prénatales', code: 'CPN' },
+  { id: 'de3', name: 'Vaccinations complètes', code: 'VAC_COMP' },
+  { id: 'de4', name: 'Naissances assistées', code: 'NAIS_ASST' },
+  { id: 'de5', name: 'Cas de paludisme', code: 'PALU_CAS' },
+  { id: 'de6', name: 'Cas de diarrhée', code: 'DIAR_CAS' },
+  { id: 'de7', name: 'Enfants malnutris', code: 'MALNUT' },
+  { id: 'de8', name: 'Décès maternels', code: 'DEC_MAT' },
+  { id: 'de9', name: 'Décès infantiles', code: 'DEC_INF' },
+  { id: 'de10', name: 'Accouchements', code: 'ACCOU' },
+];
+
+export const VISUALIZATION_INDICATORS: VisualizationDimensionItem[] = [
+  { id: 'ind1', name: 'Taux de couverture vaccinale', code: 'TX_VAC' },
+  { id: 'ind2', name: 'Taux de consultation prénatale', code: 'TX_CPN' },
+  { id: 'ind3', name: 'Taux de mortalité infantile', code: 'TX_MORT_INF' },
+  { id: 'ind4', name: 'Taux de mortalité maternelle', code: 'TX_MORT_MAT' },
+  { id: 'ind5', name: 'Ratio personnel/population', code: 'RATIO_PERS' },
+];
+
+export const VISUALIZATION_PERIODS: VisualizationDimensionItem[] = [
+  { id: 'THIS_MONTH', name: 'Ce mois-ci' },
+  { id: 'LAST_MONTH', name: 'Mois dernier' },
+  { id: 'LAST_3_MONTHS', name: '3 derniers mois' },
+  { id: 'LAST_6_MONTHS', name: '6 derniers mois' },
+  { id: 'THIS_YEAR', name: 'Cette année' },
+  { id: 'LAST_YEAR', name: 'Année dernière' },
+  { id: 'LAST_5_YEARS', name: '5 dernières années' },
+  { id: '2024', name: '2024' },
+  { id: '2023', name: '2023' },
+  { id: '2022', name: '2022' },
+  { id: '202401', name: 'Janvier 2024' },
+  { id: '202402', name: 'Février 2024' },
+  { id: '202403', name: 'Mars 2024' },
+];
+
+export const VISUALIZATION_ORG_UNITS: VisualizationDimensionItem[] = [
+  { id: 'ou1', name: 'Région de Conakry', code: 'CKY' },
+  { id: 'ou2', name: 'Région de Kindia', code: 'KND' },
+  { id: 'ou3', name: 'Région de Boké', code: 'BOK' },
+  { id: 'ou4', name: 'Région de Mamou', code: 'MAM' },
+  { id: 'ou5', name: 'Région de Labé', code: 'LAB' },
+  { id: 'ou6', name: 'Région de Faranah', code: 'FAR' },
+  { id: 'ou7', name: 'Région de Kankan', code: 'KAN' },
+  { id: 'ou8', name: 'Région de Nzérékoré', code: 'NZR' },
+];
+
 // CHWs (Agents de Santé Communautaire)
 export const CHWS: ChwsMap[] = [
   { id: 'chw-001', external_id: 'CHW001', name: 'Mamadou Diallo', country_id: 'country-gn', region_id: 'region-conakry', prefecture_id: 'pref-ratoma', commune_id: 'com-ratoma', hospital_id: 'hosp-ratoma', district_quartier_id: 'dq-koloma' },
@@ -1118,6 +1175,27 @@ export function initializeTestData(): void {
   if (db.count('recos') === 0) {
     db.createMany('recos', RECOS);
     console.log('[TestData] RECOs créés:', RECOS.length);
+  }
+
+  // Visualization dimensions
+  if (db.count('visualization_data_elements') === 0) {
+    db.createMany('visualization_data_elements', VISUALIZATION_DATA_ELEMENTS);
+    console.log('[TestData] Éléments de données de visualisation créés:', VISUALIZATION_DATA_ELEMENTS.length);
+  }
+
+  if (db.count('visualization_indicators') === 0) {
+    db.createMany('visualization_indicators', VISUALIZATION_INDICATORS);
+    console.log('[TestData] Indicateurs de visualisation créés:', VISUALIZATION_INDICATORS.length);
+  }
+
+  if (db.count('visualization_periods') === 0) {
+    db.createMany('visualization_periods', VISUALIZATION_PERIODS);
+    console.log('[TestData] Périodes de visualisation créées:', VISUALIZATION_PERIODS.length);
+  }
+
+  if (db.count('visualization_org_units') === 0) {
+    db.createMany('visualization_org_units', VISUALIZATION_ORG_UNITS);
+    console.log('[TestData] Unités organisationnelles de visualisation créées:', VISUALIZATION_ORG_UNITS.length);
   }
 
   if (db.count('families') === 0) {
