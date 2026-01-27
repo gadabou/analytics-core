@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight,
-  BarChart3,
   FileText,
   Map,
   Users,
@@ -13,15 +12,10 @@ import {
   BookOpen,
   Gauge,
   Activity,
-  Calendar,
-  Pill,
-  Baby,
-  Home,
-  Heart,
-  Package,
   User,
   Settings,
   LogOut,
+  Eye,
 } from 'lucide-react';
 import { cn } from '@utils/cn';
 import { collapseVariants, sidebarItemTextVariants } from '@animations';
@@ -48,29 +42,20 @@ export interface SidebarProps {
 
 const sidebarItems: SidebarItem[] = [
   {
-    path: '/dashboards',
-    label: 'Tableaux de bord',
-    icon: <Gauge size={20} />,
+    path: '/visualization',
+    label: 'Visualisation',
+    icon: <Eye size={20} />,
     children: [
-      { path: '/dashboards/monthly', label: 'Mensuel', icon: <BarChart3 size={18} /> },
-      { path: '/dashboards/realtime', label: 'Temps réel', icon: <Activity size={18} /> },
+      { path: '/dashboards/monthly', label: 'Tableau de bord mensuel', icon: <Gauge size={18} /> },
+      { path: '/dashboards/realtime', label: 'Tableau de bord temps réel', icon: <Activity size={18} /> },
+      {
+        path: '/reports',
+        label: 'Rapports',
+        icon: <FileText size={18} />,
+      },
+      { path: '/maps', label: 'Cartes', icon: <Map size={18} /> },
     ],
   },
-  {
-    path: '/reports',
-    label: 'Rapports',
-    icon: <FileText size={20} />,
-    children: [
-      { path: '/reports/chw-reco-monthly', label: 'Activités RECO', icon: <Activity size={18} /> },
-      { path: '/reports/family-planning', label: 'Planification Familiale', icon: <Calendar size={18} /> },
-      { path: '/reports/morbidity', label: 'Morbidité', icon: <Pill size={18} /> },
-      { path: '/reports/pcimne', label: 'PCIMNE', icon: <Baby size={18} /> },
-      { path: '/reports/promotion', label: 'Promotion', icon: <Heart size={18} /> },
-      { path: '/reports/household-recap', label: 'Récap Ménages', icon: <Home size={18} /> },
-      { path: '/reports/reco-meg-situation', label: 'Situation MEG', icon: <Package size={18} /> },
-    ],
-  },
-  { path: '/maps', label: 'Cartes', icon: <Map size={20} /> },
   {
     path: '/users',
     label: 'Utilisateurs',

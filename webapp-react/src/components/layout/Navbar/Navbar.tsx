@@ -9,7 +9,6 @@ import {
   LogOut,
   Settings,
   ChevronDown,
-  BarChart3,
   FileText,
   Map,
   Users,
@@ -18,6 +17,8 @@ import {
   Gauge,
   Search,
   Mail,
+  Eye,
+  Activity,
 } from 'lucide-react';
 import { cn } from '@utils/cn';
 import { dropdownVariants } from '@animations';
@@ -40,16 +41,16 @@ export interface NavbarProps {
 
 const defaultNavItems: NavItem[] = [
   {
-    path: '/dashboards',
-    label: 'Tableaux de bord',
-    icon: <Gauge size={18} />,
+    path: '/visualization',
+    label: 'Visualisation',
+    icon: <Eye size={18} />,
     children: [
-      { path: '/dashboards/monthly', label: 'Mensuel', icon: <BarChart3 size={16} /> },
-      { path: '/dashboards/realtime', label: 'Temps réel', icon: <Gauge size={16} /> },
+      { path: '/dashboards/monthly', label: 'Tableau de bord mensuel', icon: <Gauge size={16} /> },
+      { path: '/dashboards/realtime', label: 'Tableau de bord temps réel', icon: <Activity size={16} /> },
+      { path: '/reports', label: 'Rapports', icon: <FileText size={16} /> },
+      { path: '/maps', label: 'Cartes', icon: <Map size={16} /> },
     ],
   },
-  { path: '/reports', label: 'Rapports', icon: <FileText size={18} /> },
-  { path: '/maps', label: 'Cartes', icon: <Map size={18} /> },
   { path: '/users', label: 'Utilisateurs', icon: <Users size={18} /> },
   { path: '/administration', label: 'Administration', icon: <Shield size={18} /> },
   { path: '/documentations', label: 'Documentation', icon: <BookOpen size={18} /> },
@@ -57,10 +58,10 @@ const defaultNavItems: NavItem[] = [
 
 // Menu items for the DHIS2-style app menu grid
 const appMenuItems: NavItem[] = [
-  { path: '/dashboards/monthly', label: 'Dashboards Mensuels', icon: <Gauge size={28} /> },
-  { path: '/dashboards/realtime', label: 'Dashboards Dynamique', icon: <BarChart3 size={28} /> },
-  { path: '/reports', label: 'Rapports', icon: <BarChart3 size={28} /> },
-  { path: '/maps', label: 'Geolocalisation (Maps)', icon: <Map size={28} /> },
+  { path: '/dashboards/monthly', label: 'Tableau de bord mensuel', icon: <Gauge size={28} /> },
+  { path: '/dashboards/realtime', label: 'Tableau de bord temps réel', icon: <Activity size={28} /> },
+  { path: '/reports', label: 'Rapports', icon: <FileText size={28} /> },
+  { path: '/maps', label: 'Cartes', icon: <Map size={28} /> },
   { path: '/users', label: 'Utilisateurs', icon: <Users size={28} /> },
   { path: '/administration', label: 'Administration', icon: <Shield size={28} /> },
   { path: '/documentations', label: 'Documentations', icon: <BookOpen size={28} /> },

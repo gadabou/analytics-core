@@ -13,8 +13,8 @@ export function AppRoutes() {
     <AnimatePresence mode="wait">
       <Suspense fallback={<SuspenseLoader />}>
         <Routes location={location} key={location.pathname}>
-          {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/reports" replace />} />
+          {/* Default redirect - Page par défaut après connexion */}
+          <Route path="/" element={<Navigate to="/dashboards/monthly" replace />} />
 
           {/* Auth routes (public) */}
           <Route
