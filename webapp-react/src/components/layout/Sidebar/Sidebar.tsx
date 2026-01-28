@@ -43,7 +43,7 @@ export interface SidebarProps {
 
 const sidebarItems: SidebarItem[] = [
   {
-    path: '/visualization',
+    path: ROUTES.visualization(),
     label: 'Visualisation',
     icon: <Eye size={20} />,
     children: [

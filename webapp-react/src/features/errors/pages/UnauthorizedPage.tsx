@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Home, LogIn } from 'lucide-react';
 import { Button } from '@components/ui';
+import { ROUTES } from '@routes';
 import styles from './ErrorPage.module.css';
 
 export default function UnauthorizedPage() {
@@ -28,12 +29,12 @@ export default function UnauthorizedPage() {
         </p>
 
         <div className={styles.actions}>
-          <Link to="/auths/login">
+          <Link to={ROUTES.auth.login()}>
             <Button variant="ghost" leftIcon={<LogIn size={18} />}>
               Se connecter
             </Button>
           </Link>
-          <Link to="/">
+          <Link to={ROUTES.home()}>
             <Button leftIcon={<Home size={18} />}>
               Accueil
             </Button>

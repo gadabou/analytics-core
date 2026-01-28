@@ -8,6 +8,7 @@ import { Input, Button } from '@components/ui';
 import { loginFormSchema, type LoginFormData } from '@utils/validators';
 import { useAuthActions } from '../hooks/useAuth';
 import { useStore } from '@store';
+import { ROUTES } from '@routes';
 import styles from './LoginPage.module.css';
 
 export default function LoginPage() {
@@ -76,7 +77,7 @@ export default function LoginPage() {
 
         {/* Forgot Password Link */}
         <div className={styles.forgotPassword}>
-          <a href="/auths/forgot-password">Mot de passe oublié ?</a>
+          <a href={ROUTES.auth.forgotPassword()}>Mot de passe oublié ?</a>
         </div>
 
         {/* Submit Button */}

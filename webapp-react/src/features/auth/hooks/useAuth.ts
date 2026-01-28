@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '@store';
 import { authService } from '../services/auth.service';
+import { ROUTES, DEFAULT_AUTHENTICATED_ROUTE } from '@routes';
 import type { LoginCredentials, ChangePasswordPayload } from '@/types';
 
 export function useAuthActions() {
@@ -25,9 +26,9 @@ export function useAuthActions() {
 
         // Redirect based on user state
         if (response.user.mustChangeDefaultPassword) {
-          navigate('/auths/change-default-password');
+          navigate(ROUTES.auth.changePassword());
         } else {
-          navigate('/reports');
+          navigate(DEFAULT_AUTHENTICATED_ROUTE);
         }
 
         return response;
@@ -53,7 +54,7 @@ export function useAuthActions() {
     } finally {
       storeLogout();
       setLoading(false);
-      navigate('/auths/login');
+      navigate(ROUTES.auth.login());
     }
   }, [navigate, setLoading, storeLogout]);
 
@@ -65,7 +66,7 @@ export function useAuthActions() {
       try {
         await authService.changePassword(payload);
         updateUser({ mustChangeDefaultPassword: false });
-        navigate('/reports');
+        navigate(DEFAULT_AUTHENTICATED_ROUTE);
       } catch (error) {
         const message =
           error instanceof Error ? error.message : 'Erreur lors du changement de mot de passe';

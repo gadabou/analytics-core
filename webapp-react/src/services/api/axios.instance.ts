@@ -1,5 +1,6 @@
 import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 import { useStore } from '@store';
+import { LOGIN_ROUTE } from '@routes';
 
 // Create axios instance
 const axiosInstance = axios.create({
@@ -61,13 +62,13 @@ axiosInstance.interceptors.response.use(
         } catch (refreshError) {
           // Refresh failed, logout user
           useStore.getState().logout();
-          window.location.href = '/auths/login';
+          window.location.href = LOGIN_ROUTE;
           return Promise.reject(refreshError);
         }
       } else {
         // No refresh token, logout user
         useStore.getState().logout();
-        window.location.href = '/auths/login';
+        window.location.href = LOGIN_ROUTE;
       }
     }
 

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@components/ui';
+import { ROUTES } from '@routes';
 import styles from './ErrorPage.module.css';
 
 export default function NotFoundPage() {
@@ -35,7 +36,7 @@ export default function NotFoundPage() {
           >
             Retour
           </Button>
-          <Link to="/">
+          <Link to={ROUTES.home()}>
             <Button leftIcon={<Home size={18} />}>
               Accueil
             </Button>

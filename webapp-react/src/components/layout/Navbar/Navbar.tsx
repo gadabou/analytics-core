@@ -42,7 +42,7 @@ export interface NavbarProps {
 
 const defaultNavItems: NavItemWithIcon[] = [
   {
-    path: '/visualization',
+    path: ROUTES.visualization(),
     label: 'Visualisation',
     icon: <Eye size={18} />,
     children: [
@@ -129,7 +129,7 @@ export function Navbar({
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          <Link to="/" className={styles.brand}>
+          <Link to={ROUTES.home()} className={styles.brand}>
             <span className={styles.brandIcon}>K</span>
             <span className={styles.brandText}>Kendeya Analytics</span>
           </Link>

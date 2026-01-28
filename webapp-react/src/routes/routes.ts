@@ -63,6 +63,11 @@ export const ROUTES = {
   home: () => PATHS.HOME,
 
   // ============================================
+  // MENU GROUPS (for navigation structure only)
+  // ============================================
+  visualization: () => PATHS.VISUALIZATION,
+
+  // ============================================
   // AUTHENTICATION
   // ============================================
   auth: {
@@ -174,7 +179,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     name: 'visualization',
     label: 'Visualisation',
-    path: '/visualization',
+    path: PATHS.VISUALIZATION,
     children: [
       {
         name: 'dashboards.monthly',

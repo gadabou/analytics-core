@@ -16,6 +16,11 @@ export const PATHS = {
   HOME: '/',
 
   // ============================================
+  // MENU GROUPS (for navigation structure only)
+  // ============================================
+  VISUALIZATION: '/visualization',
+
+  // ============================================
   // AUTHENTICATION
   // ============================================
   AUTH: {
