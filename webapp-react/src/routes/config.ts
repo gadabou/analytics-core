@@ -47,6 +47,17 @@ export interface RedirectConfig {
 
 export const routeConfigs: RouteConfig[] = [
   // ----------------------------------------
+  // Home (Visualization Dashboard)
+  // ----------------------------------------
+  {
+    name: 'home',
+    path: PATHS.HOME,
+    component: Pages.VisualizationHomePage,
+    guard: 'private',
+    title: 'Accueil - Visualisations',
+  },
+
+  // ----------------------------------------
   // Authentication
   // ----------------------------------------
   {
@@ -218,7 +229,6 @@ export const routeConfigs: RouteConfig[] = [
 // ============================================
 
 export const redirectConfigs: RedirectConfig[] = [
-  { from: PATHS.HOME, to: PATHS.DASHBOARDS.MONTHLY },
   { from: PATHS.DASHBOARDS.ROOT, to: PATHS.DASHBOARDS.MONTHLY },
   { from: PATHS.USERS.ROOT, to: PATHS.USERS.LIST },
 ];
@@ -251,7 +261,7 @@ export function getRoutesByGuard(guard: RouteGuard): RouteConfig[] {
 /**
  * Default redirect path after login
  */
-export const DEFAULT_AUTHENTICATED_ROUTE = PATHS.DASHBOARDS.MONTHLY;
+export const DEFAULT_AUTHENTICATED_ROUTE = PATHS.HOME;
 
 /**
  * Login page path
