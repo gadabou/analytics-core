@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BarChart3, Users, CheckSquare } from 'lucide-react';
+import { BarChart3, Users, CheckSquare, Eye, AlertCircle } from 'lucide-react';
 import { PageWrapper } from '@components/layout';
 import { GraduationLoader } from '@components/loaders/GraduationLoader/GraduationLoader';
+import { VisualizationCard } from '@components/visualizations';
 import { useDashboard } from '@/hooks/useDashboard';
+import { useVisualizations } from '@/hooks/useVisualizations';
 import {
   DashboardFilters,
   RecoPerformanceTable,
@@ -13,7 +15,7 @@ import {
 import type { DashboardFilterParams } from '@/stores/dashboard.store';
 import styles from './MonthlyDashboard.module.css';
 
-type TabType = 'PERFORMANCES' | 'TASKS_STATE' | 'ACTIVE_RECO';
+type TabType = 'PERFORMANCES' | 'TASKS_STATE' | 'ACTIVE_RECO' | 'VISUALIZATIONS';
 
 interface Tab {
   id: TabType;
@@ -25,6 +27,7 @@ const TABS: Tab[] = [
   { id: 'PERFORMANCES', label: 'PERFORMANCES DES RECOS', icon: <BarChart3 size={18} /> },
   { id: 'TASKS_STATE', label: 'RECOS TÂCHES NON RÉALISÉES', icon: <CheckSquare size={18} /> },
   { id: 'ACTIVE_RECO', label: 'STATUS RECOS ACTIVES', icon: <Users size={18} /> },
+  { id: 'VISUALIZATIONS', label: 'VISUALISATIONS', icon: <Eye size={18} /> },
 ];
 
 export default function MonthlyDashboard() {
@@ -40,6 +43,13 @@ export default function MonthlyDashboard() {
     fetchActiveReco,
     fetchRecoTasksState,
   } = useDashboard();
+
+  // Fetch dashboard visualizations
+  const {
+    dashboardVisualizations,
+    isLoading: isVisualizationsLoading,
+    deleteVisualization,
+  } = useVisualizations('dashboard');
 
   const [currentTab, setCurrentTab] = useState<TabType>(activeTab);
 
@@ -71,6 +81,8 @@ export default function MonthlyDashboard() {
         return status.ACTIVE_RECOS.isLoading;
       case 'TASKS_STATE':
         return status.RECOS_TASKS_STATE.isLoading;
+      case 'VISUALIZATIONS':
+        return isVisualizationsLoading;
       default:
         return false;
     }
@@ -126,6 +138,42 @@ export default function MonthlyDashboard() {
               <TasksStateTable
                 data={tasksStateData}
               />
+            )}
+          </motion.div>
+        );
+      case 'VISUALIZATIONS':
+        return (
+          <motion.div
+            key="visualizations"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <GraduationLoader isLoading={isVisualizationsLoading} />
+            {!isVisualizationsLoading && (
+              <>
+                {dashboardVisualizations.length === 0 ? (
+                  <div className={styles.emptyState}>
+                    <AlertCircle size={48} />
+                    <h3>Aucune visualisation</h3>
+                    <p>
+                      Aucune visualisation de type &quot;tableau de bord&quot; n&apos;a été créée.
+                      Créez-en une depuis la page Administration.
+                    </p>
+                  </div>
+                ) : (
+                  <div className={styles.visualizationsGrid}>
+                    {dashboardVisualizations.map((viz) => (
+                      <VisualizationCard
+                        key={viz.id}
+                        visualization={viz}
+                        onDelete={deleteVisualization}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </motion.div>
         );
