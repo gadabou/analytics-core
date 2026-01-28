@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@utils/cn';
 import { collapseVariants, sidebarItemTextVariants } from '@animations';
+import { ROUTES } from '@routes';
 import styles from './Sidebar.module.css';
 
 export interface SidebarItem {
@@ -46,29 +47,25 @@ const sidebarItems: SidebarItem[] = [
     label: 'Visualisation',
     icon: <Eye size={20} />,
     children: [
-      { path: '/dashboards/monthly', label: 'Tableau de bord mensuel', icon: <Gauge size={18} /> },
-      { path: '/dashboards/realtime', label: 'Tableau de bord temps réel', icon: <Activity size={18} /> },
-      {
-        path: '/reports',
-        label: 'Rapports',
-        icon: <FileText size={18} />,
-      },
-      { path: '/maps', label: 'Cartes', icon: <Map size={18} /> },
+      { path: ROUTES.dashboards.monthly(), label: 'Tableau de bord mensuel', icon: <Gauge size={18} /> },
+      { path: ROUTES.dashboards.realtime(), label: 'Tableau de bord temps réel', icon: <Activity size={18} /> },
+      { path: ROUTES.reports.root(), label: 'Rapports', icon: <FileText size={18} /> },
+      { path: ROUTES.maps.root(), label: 'Cartes', icon: <Map size={18} /> },
     ],
   },
   {
-    path: '/users',
+    path: ROUTES.users.root(),
     label: 'Utilisateurs',
     icon: <Users size={20} />,
     children: [
-      { path: '/users/list', label: 'Liste', icon: <Users size={18} /> },
-      { path: '/users/organizations', label: 'Organisations', icon: <Building2 size={18} /> },
-      { path: '/users/permissions', label: 'Permissions', icon: <ShieldCheck size={18} /> },
-      { path: '/users/roles', label: 'Rôles', icon: <Shield size={18} /> },
+      { path: ROUTES.users.list(), label: 'Liste', icon: <Users size={18} /> },
+      { path: ROUTES.users.organizations(), label: 'Organisations', icon: <Building2 size={18} /> },
+      { path: ROUTES.users.permissions(), label: 'Permissions', icon: <ShieldCheck size={18} /> },
+      { path: ROUTES.users.roles(), label: 'Rôles', icon: <Shield size={18} /> },
     ],
   },
-  { path: '/administration', label: 'Administration', icon: <Shield size={20} /> },
-  { path: '/documentations', label: 'Documentation', icon: <BookOpen size={20} /> },
+  { path: ROUTES.admin.root(), label: 'Administration', icon: <Shield size={20} /> },
+  { path: ROUTES.documentation.root(), label: 'Documentation', icon: <BookOpen size={20} /> },
 ];
 
 export function Sidebar({ isOpen, isCollapsed = false, onClose, userName = 'Utilisateur', userRole = 'Admin', onLogout }: SidebarProps) {
@@ -86,7 +83,7 @@ export function Sidebar({ isOpen, isCollapsed = false, onClose, userName = 'Util
 
   // User menu items (mobile only)
   const userMenuItems: SidebarItem[] = [
-    { path: '/settings', label: 'Paramètres', icon: <Settings size={20} /> },
+    { path: ROUTES.settings.root(), label: 'Paramètres', icon: <Settings size={20} /> },
     {
       path: '#',
       label: 'Déconnexion',

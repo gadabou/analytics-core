@@ -1,10 +1,93 @@
+/**
+ * AppRoutes - Main routing component
+ *
+ * Uses centralized route configuration to generate routes dynamically.
+ * Supports public, private, and guest-only routes with guards.
+ */
+
 import { Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { SuspenseLoader } from '@components/loaders';
 import { PrivateRoute } from './PrivateRoute';
 import { PublicRoute } from './PublicRoute';
+import { routeConfigs, redirectConfigs } from './config';
+import type { RouteConfig } from './config';
 import * as Pages from './lazy';
+
+// ============================================
+// ROUTE WRAPPER COMPONENTS
+// ============================================
+
+interface RouteWrapperProps {
+  config: RouteConfig;
+}
+
+/**
+ * Wraps route component with appropriate guard
+ */
+function RouteWrapper({ config }: RouteWrapperProps) {
+  const Component = config.component;
+
+  switch (config.guard) {
+    case 'private':
+      return (
+        <PrivateRoute>
+          <Component />
+        </PrivateRoute>
+      );
+
+    case 'guest':
+      // Guest routes are for unauthenticated users only (e.g., login)
+      return (
+        <PublicRoute>
+          <Component />
+        </PublicRoute>
+      );
+
+    case 'public':
+    default:
+      return <Component />;
+  }
+}
+
+// ============================================
+// ROUTE GENERATOR
+// ============================================
+
+/**
+ * Generates Route elements from route configuration
+ */
+function generateRoutes(configs: RouteConfig[]) {
+  return configs.map((config) => {
+    const path = config.wildcard ? `${config.path}/*` : config.path;
+
+    return (
+      <Route
+        key={config.name}
+        path={path}
+        element={<RouteWrapper config={config} />}
+      />
+    );
+  });
+}
+
+/**
+ * Generates redirect Route elements
+ */
+function generateRedirects() {
+  return redirectConfigs.map(({ from, to }) => (
+    <Route
+      key={`redirect-${from}`}
+      path={from}
+      element={<Navigate to={to} replace />}
+    />
+  ));
+}
+
+// ============================================
+// MAIN APP ROUTES COMPONENT
+// ============================================
 
 export function AppRoutes() {
   const location = useLocation();
@@ -13,144 +96,11 @@ export function AppRoutes() {
     <AnimatePresence mode="wait">
       <Suspense fallback={<SuspenseLoader />}>
         <Routes location={location} key={location.pathname}>
-          {/* Default redirect - Page par défaut après connexion */}
-          <Route path="/" element={<Navigate to="/dashboards/monthly" replace />} />
+          {/* Redirects */}
+          {generateRedirects()}
 
-          {/* Auth routes (public) */}
-          <Route
-            path="/auths/login"
-            element={
-              <PublicRoute>
-                <Pages.LoginPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/auths/change-default-password"
-            element={
-              <PrivateRoute>
-                <Pages.ChangePasswordPage />
-              </PrivateRoute>
-            }
-          />
-
-          {/* Reports routes (private) */}
-          <Route
-            path="/reports/*"
-            element={
-              <PrivateRoute>
-                <Pages.ReportsPage />
-              </PrivateRoute>
-            }
-          />
-
-          {/* Dashboard routes (private) */}
-          <Route
-            path="/dashboards/monthly/*"
-            element={
-              <PrivateRoute>
-                <Pages.MonthlyDashboardPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/dashboards/realtime/*"
-            element={
-              <PrivateRoute>
-                <Pages.RealtimeDashboardPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/dashboards"
-            element={<Navigate to="/dashboards/monthly" replace />}
-          />
-
-          {/* Maps route (private) */}
-          <Route
-            path="/maps/*"
-            element={
-              <PrivateRoute>
-                <Pages.MapsPage />
-              </PrivateRoute>
-            }
-          />
-
-          {/* Users routes (private) */}
-          <Route
-            path="/users/list"
-            element={
-              <PrivateRoute>
-                <Pages.UsersPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/users/organizations"
-            element={
-              <PrivateRoute>
-                <Pages.OrganizationsPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/users/permissions"
-            element={
-              <PrivateRoute>
-                <Pages.PermissionsPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/users/roles"
-            element={
-              <PrivateRoute>
-                <Pages.RolesPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/users"
-            element={<Navigate to="/users/list" replace />}
-          />
-
-          {/* Admin route (private) */}
-          <Route
-            path="/administration/*"
-            element={
-              <PrivateRoute>
-                <Pages.AdminPage />
-              </PrivateRoute>
-            }
-          />
-
-          {/* Managements route (private) */}
-          <Route
-            path="/managements/*"
-            element={
-              <PrivateRoute>
-                <Pages.ManagementsPage />
-              </PrivateRoute>
-            }
-          />
-
-          {/* Documentation route (public) */}
-          <Route path="/documentations/*" element={<Pages.DocumentationPage />} />
-
-          {/* Settings route (private) */}
-          <Route
-            path="/settings"
-            element={
-              <PrivateRoute>
-                <Pages.SettingsPage />
-              </PrivateRoute>
-            }
-          />
-
-          {/* Error pages */}
-          <Route path="/errors/401" element={<Pages.UnauthorizedPage />} />
-          <Route path="/errors/500" element={<Pages.ServerErrorPage />} />
-          <Route path="/errors/404" element={<Pages.NotFoundPage />} />
+          {/* Dynamic routes from configuration */}
+          {generateRoutes(routeConfigs)}
 
           {/* Catch all - 404 */}
           <Route path="*" element={<Pages.NotFoundPage />} />
@@ -159,3 +109,22 @@ export function AppRoutes() {
     </AnimatePresence>
   );
 }
+
+// ============================================
+// RE-EXPORTS for convenient imports
+// ============================================
+
+export { PATHS } from './paths';
+export { ROUTES, NAV_ITEMS, APP_MENU_ITEMS } from './routes';
+export type { NavItem } from './routes';
+export {
+  routeConfigs,
+  redirectConfigs,
+  getRouteByName,
+  getRouteByPath,
+  getRoutesByGuard,
+  DEFAULT_AUTHENTICATED_ROUTE,
+  LOGIN_ROUTE,
+  NOT_FOUND_ROUTE,
+} from './config';
+export type { RouteConfig, RouteGuard, RedirectConfig } from './config';

@@ -39,7 +39,9 @@
       "@assets/*": ["src/assets/*"],
       "@animations/*": ["src/animations/*"],
       "@animations": ["src/animations/index.ts"],
-      "@config/*": ["src/config/*"]
+      "@config/*": ["src/config/*"],
+      "@routes": ["src/routes/index.tsx"],
+      "@routes/*": ["src/routes/*"]
     }
   },
   "include": ["src"]

@@ -18,6 +18,7 @@ export default defineConfig({
       '@assets': path.resolve(__dirname, './src/assets'),
       '@animations': path.resolve(__dirname, './src/animations'),
       '@config': path.resolve(__dirname, './src/config'),
+      '@routes': path.resolve(__dirname, './src/routes'),
     },
   },
   css: {

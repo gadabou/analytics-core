@@ -22,13 +22,14 @@ import {
 } from 'lucide-react';
 import { cn } from '@utils/cn';
 import { dropdownVariants } from '@animations';
+import { ROUTES } from '@routes';
 import styles from './Navbar.module.css';
 
-export interface NavItem {
+export interface NavItemWithIcon {
   path: string;
   label: string;
   icon: React.ReactNode;
-  children?: NavItem[];
+  children?: NavItemWithIcon[];
 }
 
 export interface NavbarProps {
@@ -39,32 +40,32 @@ export interface NavbarProps {
   onLogout?: () => void;
 }
 
-const defaultNavItems: NavItem[] = [
+const defaultNavItems: NavItemWithIcon[] = [
   {
     path: '/visualization',
     label: 'Visualisation',
     icon: <Eye size={18} />,
     children: [
-      { path: '/dashboards/monthly', label: 'Tableau de bord mensuel', icon: <Gauge size={16} /> },
-      { path: '/dashboards/realtime', label: 'Tableau de bord temps réel', icon: <Activity size={16} /> },
-      { path: '/reports', label: 'Rapports', icon: <FileText size={16} /> },
-      { path: '/maps', label: 'Cartes', icon: <Map size={16} /> },
+      { path: ROUTES.dashboards.monthly(), label: 'Tableau de bord mensuel', icon: <Gauge size={16} /> },
+      { path: ROUTES.dashboards.realtime(), label: 'Tableau de bord temps réel', icon: <Activity size={16} /> },
+      { path: ROUTES.reports.root(), label: 'Rapports', icon: <FileText size={16} /> },
+      { path: ROUTES.maps.root(), label: 'Cartes', icon: <Map size={16} /> },
     ],
   },
-  { path: '/users', label: 'Utilisateurs', icon: <Users size={18} /> },
-  { path: '/administration', label: 'Administration', icon: <Shield size={18} /> },
-  { path: '/documentations', label: 'Documentation', icon: <BookOpen size={18} /> },
+  { path: ROUTES.users.root(), label: 'Utilisateurs', icon: <Users size={18} /> },
+  { path: ROUTES.admin.root(), label: 'Administration', icon: <Shield size={18} /> },
+  { path: ROUTES.documentation.root(), label: 'Documentation', icon: <BookOpen size={18} /> },
 ];
 
 // Menu items for the DHIS2-style app menu grid
-const appMenuItems: NavItem[] = [
-  { path: '/dashboards/monthly', label: 'Tableau de bord mensuel', icon: <Gauge size={28} /> },
-  { path: '/dashboards/realtime', label: 'Tableau de bord temps réel', icon: <Activity size={28} /> },
-  { path: '/reports', label: 'Rapports', icon: <FileText size={28} /> },
-  { path: '/maps', label: 'Cartes', icon: <Map size={28} /> },
-  { path: '/users', label: 'Utilisateurs', icon: <Users size={28} /> },
-  { path: '/administration', label: 'Administration', icon: <Shield size={28} /> },
-  { path: '/documentations', label: 'Documentations', icon: <BookOpen size={28} /> },
+const appMenuItems: NavItemWithIcon[] = [
+  { path: ROUTES.dashboards.monthly(), label: 'Tableau de bord mensuel', icon: <Gauge size={28} /> },
+  { path: ROUTES.dashboards.realtime(), label: 'Tableau de bord temps réel', icon: <Activity size={28} /> },
+  { path: ROUTES.reports.root(), label: 'Rapports', icon: <FileText size={28} /> },
+  { path: ROUTES.maps.root(), label: 'Cartes', icon: <Map size={28} /> },
+  { path: ROUTES.users.list(), label: 'Utilisateurs', icon: <Users size={28} /> },
+  { path: ROUTES.admin.root(), label: 'Administration', icon: <Shield size={28} /> },
+  { path: ROUTES.documentation.root(), label: 'Documentations', icon: <BookOpen size={28} /> },
 ];
 
 export function Navbar({
@@ -288,7 +289,7 @@ export function Navbar({
                   animate="animate"
                   exit="exit"
                 >
-                  <Link to="/settings" className={styles.userMenuItem} onClick={() => setUserMenuOpen(false)}>
+                  <Link to={ROUTES.settings.root()} className={styles.userMenuItem} onClick={() => setUserMenuOpen(false)}>
                     <Settings size={16} />
                     <span>Paramètres</span>
                   </Link>

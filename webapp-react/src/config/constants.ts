@@ -30,26 +30,6 @@ export const DATE_FORMAT = 'dd/MM/yyyy';
 export const DATE_TIME_FORMAT = 'dd/MM/yyyy HH:mm';
 export const MONTH_YEAR_FORMAT = 'MMMM yyyy';
 
-// Routes
-export const ROUTES = {
-  HOME: '/',
-  LOGIN: '/auths/login',
-  CHANGE_PASSWORD: '/auths/change-default-password',
-  REPORTS: '/reports',
-  DASHBOARDS: '/dashboards',
-  DASHBOARDS_MONTHLY: '/dashboards/monthly',
-  DASHBOARDS_REALTIME: '/dashboards/realtime',
-  MAPS: '/maps',
-  USERS: '/users',
-  USERS_LIST: '/users/list',
-  USERS_ROLES: '/users/roles',
-  ADMIN: '/administration',
-  DOCUMENTATION: '/documentations',
-  ERROR_401: '/errors/401',
-  ERROR_404: '/errors/404',
-  ERROR_500: '/errors/500',
-} as const;
-
 // Toast/Alert durations (ms)
 export const ALERT_DURATION = {
   SHORT: 3000,
