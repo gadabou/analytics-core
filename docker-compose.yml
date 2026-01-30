@@ -64,8 +64,75 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    # ports:
-    #   - "5432:5432"
+    ports:
+      - "${PG_PORT:-5432}:5432"
+
+  # ===========================================
+  # API Node.js (api/)
+  # ===========================================
+  ih-cht-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: ih-cht-api
+    depends_on:
+      ih-cht-init-volumes:
+        condition: service_healthy
+      ih-cht-manage-postgres:
+        condition: service_healthy
+    env_file: .env
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      APP_SECRET_PRIVATE_KEY: ${APP_SECRET_PRIVATE_KEY}
+      APP_AUTH_TOKEN: ${APP_AUTH_TOKEN}
+      APP_PORT: 3000
+      API_PORT: 3000
+      PG_HOST: ih-cht-manage-postgres
+      PG_PORT: 5432
+      PG_DB_NAME: ${POSTGRES_DB}
+      PG_DB_USER: ${POSTGRES_USER}
+      PG_DB_PASS: ${POSTGRES_PASSWORD}
+      DHIS2_USER: ${DHIS2_USER}
+      DHIS2_PASS: ${DHIS2_PASS}
+      DHIS2_HOST: ${DHIS2_HOST}
+      DHIS2_PROTOCOL: ${DHIS2_PROTOCOL:-https}
+      CHT_USER: ${CHT_USER}
+      CHT_PASS: ${CHT_PASS}
+      CHT_HOST: ${CHT_HOST}
+      CHT_PROTOCOL: ${CHT_PROTOCOL:-https}
+      CHT_PORT: ${CHT_PORT:-443}
+      ACCESS_ALL_AVAILABE_PORT: ${ACCESS_ALL_AVAILABE_PORT:-false}
+      USE_LOCALHOST: ${USE_LOCALHOST:-false}
+      ACTIVE_SECURE_MODE: ${ACTIVE_SECURE_MODE:-false}
+      SERVER_HOST: ${SERVER_HOST:-localhost}
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    restart: unless-stopped
+    networks:
+      - ih-cht-manage-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # Frontend Angular (webapp/)
+  # ===========================================
+  ih-cht-webapp:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+    container_name: ih-cht-webapp
+    depends_on:
+      - ih-cht-api
+    ports:
+      - "${WEBAPP_PORT:-4200}:80"
+    restart: unless-stopped
+    networks:
+      - ih-cht-manage-net
 
   ih-cht-manage-backend:
     build:

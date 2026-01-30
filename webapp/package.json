@@ -40,6 +40,10 @@
     "arrowParens": "always",
     "parser": "typescript"
   },
+  "overrides": {
+  "typescript": "5.8.2"
+},
+
   "dependencies": {
     "@angular/animations": "^19.2.1",
     "@angular/cdk": "^19.2.2",
@@ -115,7 +119,7 @@
     "karma-coverage": "^2.2.1",
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
-    "typescript": "^5.8.2",
+    "typescript": "5.8.2",
     "webpack": "^5.100.2",
     "workbox-cli": "^7.3.0"
   }

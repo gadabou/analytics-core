@@ -1,6 +1,6 @@
 const JSONFileStorage = require('node-json-file-storage');
 import { ENV, JSON_DB_FOLDER } from './providers/constantes';
-import { createDirectories } from './functions/functions';
+import { createDirectories } from './utils/functions';
 
 const { JSON_DB_FOLDER_NAME } = ENV;
 

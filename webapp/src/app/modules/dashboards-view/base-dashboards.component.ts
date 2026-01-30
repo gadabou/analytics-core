@@ -212,22 +212,22 @@ export abstract class BaseDashboardsComponent<T> extends ExportDataComponent<any
         const vaccineInfos: { [key: string]: string[] } = {};
         for (const vaccins of vaccines) {
             for (const v of vaccins) {
-                if (![undefined, null, 'null', 'undefined', '', ' '].includes(v.parent_phone)) {
-                    if (!(v.parent_phone in vaccineInfos)) vaccineInfos[v.parent_phone] = []
-                    if (this.vaccinationUtils(v.vaccine_BCG, v.child_age_in_days, 0) == 'off') vaccineInfos[v.parent_phone].push('BCG');
-                    if (this.vaccinationUtils(v.vaccine_VPO_0, v.child_age_in_days, 0) == 'off') vaccineInfos[v.parent_phone].push('VPO0');
-                    if (this.vaccinationUtils(v.vaccine_PENTA_1, v.child_age_in_days, 42) == 'off') vaccineInfos[v.parent_phone].push('PENTA1');
-                    if (this.vaccinationUtils(v.vaccine_VPO_1, v.child_age_in_days, 42) == 'off') vaccineInfos[v.parent_phone].push('VPO1');
-                    if (this.vaccinationUtils(v.vaccine_PENTA_2, v.child_age_in_days, 70) == 'off') vaccineInfos[v.parent_phone].push('PENTA2');
-                    if (this.vaccinationUtils(v.vaccine_VPO_2, v.child_age_in_days, 70) == 'off') vaccineInfos[v.parent_phone].push('VPO2');
-                    if (this.vaccinationUtils(v.vaccine_PENTA_3, v.child_age_in_days, 98) == 'off') vaccineInfos[v.parent_phone].push('PENTA3');
-                    if (this.vaccinationUtils(v.vaccine_VPO_3, v.child_age_in_days, 98) == 'off') vaccineInfos[v.parent_phone].push('VPO3');
-                    if (this.vaccinationUtils(v.vaccine_VPI_1, v.child_age_in_days, 98) == 'off') vaccineInfos[v.parent_phone].push('VPI1');
-                    if (this.vaccinationUtils(v.vaccine_VAR_1, v.child_age_in_months, 9) == 'off') vaccineInfos[v.parent_phone].push('VAR1');
-                    if (this.vaccinationUtils(v.vaccine_VAA, v.child_age_in_months, 9) == 'off') vaccineInfos[v.parent_phone].push('VAA');
-                    if (this.vaccinationUtils(v.vaccine_VPI_2, v.child_age_in_months, 9) == 'off') vaccineInfos[v.parent_phone].push('VPI2');
-                    if (this.vaccinationUtils(v.vaccine_MEN_A, v.child_age_in_months, 15) == 'off') vaccineInfos[v.parent_phone].push('MENA');
-                    if (this.vaccinationUtils(v.vaccine_VAR_2, v.child_age_in_months, 15) == 'off') vaccineInfos[v.parent_phone].push('VAR2');
+                if (![undefined, null, 'null', 'undefined', '', ' '].includes(v.phone.parent)) {
+                    if (!(v.phone.parent in vaccineInfos)) vaccineInfos[v.phone.parent] = []
+                    if (this.vaccinationUtils(v.BCG.done, v.child.age_in_days, 0) == 'off') vaccineInfos[v.phone.parent].push('BCG');
+                    if (this.vaccinationUtils(v.VPO_0.done, v.child.age_in_days, 0) == 'off') vaccineInfos[v.phone.parent].push('VPO0');
+                    if (this.vaccinationUtils(v.PENTA_1.done, v.child.age_in_days, 42) == 'off') vaccineInfos[v.phone.parent].push('PENTA1');
+                    if (this.vaccinationUtils(v.VPO_1.done, v.child.age_in_days, 42) == 'off') vaccineInfos[v.phone.parent].push('VPO1');
+                    if (this.vaccinationUtils(v.PENTA_2.done, v.child.age_in_days, 70) == 'off') vaccineInfos[v.phone.parent].push('PENTA2');
+                    if (this.vaccinationUtils(v.VPO_2.done, v.child.age_in_days, 70) == 'off') vaccineInfos[v.phone.parent].push('VPO2');
+                    if (this.vaccinationUtils(v.PENTA_3.done, v.child.age_in_days, 98) == 'off') vaccineInfos[v.phone.parent].push('PENTA3');
+                    if (this.vaccinationUtils(v.VPO_3.done, v.child.age_in_days, 98) == 'off') vaccineInfos[v.phone.parent].push('VPO3');
+                    if (this.vaccinationUtils(v.VPI_1.done, v.child.age_in_days, 98) == 'off') vaccineInfos[v.phone.parent].push('VPI1');
+                    if (this.vaccinationUtils(v.VAR_1.done, v.child.age_in_months, 9) == 'off') vaccineInfos[v.phone.parent].push('VAR1');
+                    if (this.vaccinationUtils(v.VAA.done, v.child.age_in_months, 9) == 'off') vaccineInfos[v.phone.parent].push('VAA');
+                    if (this.vaccinationUtils(v.VPI_2.done, v.child.age_in_months, 9) == 'off') vaccineInfos[v.phone.parent].push('VPI2');
+                    if (this.vaccinationUtils(v.MEN_A.done, v.child.age_in_months, 15) == 'off') vaccineInfos[v.phone.parent].push('MENA');
+                    if (this.vaccinationUtils(v.VAR_2.done, v.child.age_in_months, 15) == 'off') vaccineInfos[v.phone.parent].push('VAR2');
                 }
             }
         }

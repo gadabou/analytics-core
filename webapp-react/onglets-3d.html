@@ -1,0 +1,302 @@
+<!-- ✅ HTML -->
+<div class="tabs3d-wrap">
+  <div class="tabs3d" role="tablist" aria-label="Navigation">
+    <button class="tab3d is-active" role="tab" aria-selected="true" data-tab="info">
+      <span class="tab3d-icon" aria-hidden="true">
+        <!-- document icon -->
+        <svg viewBox="0 0 24 24"><path d="M6 2h9l3 3v17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1v4h4" /></svg>
+      </span>
+      <span class="tab3d-label">Informations</span>
+    </button>
+
+    <button class="tab3d" role="tab" aria-selected="false" data-tab="security">
+      <span class="tab3d-icon" aria-hidden="true">
+        <!-- lock icon -->
+        <svg viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><path d="M6 11h12v10H6z"/></svg>
+      </span>
+      <span class="tab3d-label">Sécurité</span>
+    </button>
+
+    <button class="tab3d" role="tab" aria-selected="false" data-tab="prefs">
+      <span class="tab3d-icon" aria-hidden="true">
+        <!-- gear icon -->
+        <svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/><path d="M19.4 15a8.6 8.6 0 0 0 .1-1l2-1.2-2-3.6-2.3.6a8.8 8.8 0 0 0-1.7-1L15 6l-6 0-.5 2.8a8.8 8.8 0 0 0-1.7 1L4.5 9.2 2.5 12.8 4.5 14a8.6 8.6 0 0 0 .1 1l-2 1.2 2 3.6 2.3-.6a8.8 8.8 0 0 0 1.7 1L9 22l6 0 .5-2.8a8.8 8.8 0 0 0 1.7-1l2.3.6 2-3.6-2-1.2z"/></svg>
+      </span>
+      <span class="tab3d-label">Préférences</span>
+    </button>
+
+    <button class="tab3d" role="tab" aria-selected="false" data-tab="notif">
+      <span class="tab3d-icon" aria-hidden="true">
+        <!-- bell icon -->
+        <svg viewBox="0 0 24 24"><path d="M6 17h12l-1-2v-5a5 5 0 0 0-10 0v5l-1 2z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+      </span>
+      <span class="tab3d-label">Notifications</span>
+    </button>
+  </div>
+</div>
+
+<!-- ✅ (optionnel) contenu de tab -->
+<div class="tab-panels">
+  <div class="panel is-active" data-panel="info">Contenu Informations…</div>
+  <div class="panel" data-panel="security">Contenu Sécurité…</div>
+  <div class="panel" data-panel="prefs">Contenu Préférences…</div>
+  <div class="panel" data-panel="notif">Contenu Notifications…</div>
+</div>
+
+<style>
+/* ✅ CSS — style 3D comme l'image + animation hover */
+:root{
+  --bg1:#eaf1ff;
+  --bg2:#cfe0ff;
+
+  --tab-surface:#f7fbff;
+  --tab-surface-2:#e9f2ff;
+  --tab-border:#cfe0ff;
+
+  --active1:#1c7cff;
+  --active2:#0f5fe6;
+
+  --text:#2d4d7a;
+  --muted:#6e87ab;
+
+  --shadow: 0 18px 40px rgba(12, 40, 90, .18);
+  --shadow-soft: 0 10px 22px rgba(12, 40, 90, .14);
+}
+
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background: radial-gradient(1200px 600px at 50% 30%, #ffffff 0%, var(--bg1) 35%, var(--bg2) 100%);
+  color: var(--text);
+  padding: 60px 18px;
+}
+
+.tabs3d-wrap{
+  max-width: 980px;
+  margin: 0 auto;
+  display:flex;
+  justify-content:center;
+}
+
+.tabs3d{
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+  gap: 0;
+  padding: 10px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #f7fbff 0%, #e6f0ff 100%);
+  border: 1px solid rgba(160, 190, 240, .55);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+
+  /* base plate (bar under tabs) */
+}
+.tabs3d::after{
+  content:"";
+  position:absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 6px;
+  height: 18px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(210,230,255,.9), rgba(180,210,250,.55));
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.8);
+  z-index:0;
+}
+
+.tab3d{
+  position: relative;
+  z-index: 1;
+  appearance:none;
+  border: none;
+  background: linear-gradient(180deg, var(--tab-surface) 0%, var(--tab-surface-2) 100%);
+  border: 1px solid rgba(170, 200, 245, .85);
+  border-bottom-color: rgba(120, 160, 220, .55);
+  border-radius: 18px;
+  padding: 16px 18px;
+  height: 66px;
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  cursor: pointer;
+  user-select:none;
+
+  /* 3D relief */
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.95),
+    0 10px 20px rgba(15, 60, 130, .15);
+
+  transform: translateY(0);
+  transition:
+    transform .22s ease,
+    box-shadow .22s ease,
+    filter .22s ease,
+    background .22s ease,
+    border-color .22s ease;
+}
+
+.tab3d:hover{
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.95),
+    0 14px 26px rgba(15, 60, 130, .20);
+  filter: saturate(1.04);
+}
+
+.tab3d:active{
+  transform: translateY(0px);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.85),
+    0 8px 16px rgba(15, 60, 130, .16);
+}
+
+.tab3d-icon{
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display:grid;
+  place-items:center;
+  background: linear-gradient(180deg, rgba(230,245,255,.95), rgba(210,230,255,.85));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.9),
+    0 8px 16px rgba(15,60,130,.12);
+  flex: 0 0 34px;
+}
+.tab3d-icon svg{
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #5f7fa8;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke .22s ease;
+}
+
+.tab3d-label{
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: .2px;
+  color: var(--muted);
+  transition: color .22s ease;
+}
+
+/* ✅ ACTIVE TAB (bleu, 3D + glow, comme l'image) */
+.tab3d.is-active{
+  background: linear-gradient(180deg, var(--active1) 0%, var(--active2) 100%);
+  border-color: rgba(20, 120, 255, .65);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.25),
+    0 16px 30px rgba(10, 80, 200, .35);
+  transform: translateY(-2px);
+}
+.tab3d.is-active:hover{
+  transform: translateY(-6px);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.25),
+    0 20px 38px rgba(10, 80, 200, .40);
+}
+.tab3d.is-active .tab3d-label{
+  color: #ffffff;
+}
+.tab3d.is-active .tab3d-icon{
+  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.12));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.25),
+    0 10px 20px rgba(0,0,0,.12);
+}
+.tab3d.is-active .tab3d-icon svg{
+  stroke: rgba(255,255,255,.92);
+}
+
+/* ✅ petits séparateurs 3D entre les tabs (effet “barre”) */
+.tab3d:not(.is-active)::after{
+  content:"";
+  position:absolute;
+  right: -6px;
+  top: 16px;
+  width: 10px;
+  height: 34px;
+  border-radius: 12px;
+  background: radial-gradient(circle at 50% 30%, rgba(255,255,255,.8), rgba(190,215,255,.35));
+  opacity: .55;
+  pointer-events:none;
+}
+.tab3d:last-child::after{ display:none; }
+
+/* ✅ Panels (optionnel) */
+.tab-panels{
+  max-width: 980px;
+  margin: 22px auto 0;
+}
+.panel{
+  display:none;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(170,200,245,.65);
+  box-shadow: var(--shadow-soft);
+}
+.panel.is-active{ display:block; }
+
+/* ✅ Mobile */
+@media (max-width: 860px){
+  .tabs3d{
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .tabs3d::after{ display:none; }
+  .tab3d:not(.is-active)::after{ display:none; }
+}
+</style>
+
+<script>
+/* ✅ JavaScript — activation tab + animation “press” + panels */
+(function () {
+  const tabs = Array.from(document.querySelectorAll(".tab3d"));
+  const panels = Array.from(document.querySelectorAll(".panel"));
+
+  function setActive(tab) {
+    tabs.forEach(t => {
+      t.classList.toggle("is-active", t === tab);
+      t.setAttribute("aria-selected", t === tab ? "true" : "false");
+    });
+
+    // panels (optionnel)
+    const key = tab.dataset.tab;
+    if (panels.length) {
+      panels.forEach(p => p.classList.toggle("is-active", p.dataset.panel === key));
+    }
+
+    // micro-animation “press”
+    tab.animate(
+      [
+        { transform: getComputedStyle(tab).transform },
+        { transform: "translateY(0px) scale(0.99)" },
+        { transform: "" }
+      ],
+      { duration: 180, easing: "ease-out" }
+    );
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => setActive(tab));
+  });
+
+  // clavier (accessibilité) : ← →
+  document.querySelector(".tabs3d")?.addEventListener("keydown", (e) => {
+    const current = tabs.findIndex(t => t.classList.contains("is-active"));
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      setActive(tabs[(current + 1) % tabs.length]);
+      tabs[(current + 1) % tabs.length].focus();
+    }
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      setActive(tabs[(current - 1 + tabs.length) % tabs.length]);
+      tabs[(current - 1 + tabs.length) % tabs.length].focus();
+    }
+  });
+})();
+</script>

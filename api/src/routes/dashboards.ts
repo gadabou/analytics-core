@@ -1,7 +1,7 @@
 
 
 import { Router } from 'express';
-import { Middelware } from "../middleware/auth";
+import { Middelware } from "../middleware/middleware";
 import { GET_RECO_VACCINATION_ALL_DONE_DASHBOARD, GET_RECO_VACCINATION_NOT_DONE_DASHBOARD, GET_RECO_VACCINATION_PARTIAL_DONE_DASHBOARD } from '../controllers/DASHBOARDS/dashboars-realtime';
 import { GET_RECO_PERFORMANCE_DASHBOARD, GET_RECO_TASKS_STATE_DASHBOARD, GET_ACTIVE_RECO_DASHBOARD } from '../controllers/DASHBOARDS/dashboars-monthly';
 

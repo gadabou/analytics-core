@@ -7,6 +7,7 @@ import { IndexTarget } from "../models/Interfaces";
 // Functions Before General Views
 export class FunctionsBeforeGeneralInitView1740000000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(getSqlFileContent('get_value_or_default', 'functions_before_general_views_init'));
         await queryRunner.query(getSqlFileContent('calculate_age_in', 'functions_before_general_views_init'));
         await queryRunner.query(getSqlFileContent('generate_random_colors', 'functions_before_general_views_init'));
         await queryRunner.query(getSqlFileContent('age_with_full_label', 'functions_before_general_views_init'));
@@ -332,7 +333,6 @@ export class TasksStateDashboardView1740000000206 extends SqlBaseViewMigration {
     protected cible: IndexTarget = 'only_id';
     protected schema = 'dashboards';
 }
-
 
 
 // Start Maps Views

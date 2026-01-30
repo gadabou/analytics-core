@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Routes, TokenUser, Users, generateSelectedUserOrgUnitsAndContact, getUsersRepository, hashUserToken, jwSecretKey, userTokenGenerated } from '../entities/User';
-import { httpHeaders, notEmpty } from '../functions/functions';
+import { httpHeaders, notEmpty } from '../utils/functions';
 import { Roles, getRolesRepository } from '../entities/Roles';
 import crypto from 'crypto';
 import { ROUTES_LIST, _superuser, can_view_reports, can_logout, can_manage_data, can_view_dashboards, must_change_default_password, can_delete_role, can_delete_user, can_update_role, can_update_user, can_create_user, can_create_role, can_view_roles, can_view_users, AUTHORIZATIONS_LIST, dashboardsMonthlyRoute, dashboardsRealtimeRoute, mapsRoute, reportsRoute, usersRoute, can_use_offline_mode, roleAuthorizations, _public, can_update_password, can_update_profile, can_view_maps } from '../providers/authorizations-pages';
@@ -112,7 +112,7 @@ export class AuthUserController {
                 role.name = name;
                 role.routes = routes;
                 role.authorizations = authorizations;
-                return role;
+                return  role; 
             });
 
             await roleRepo.save(roles);

@@ -23,72 +23,69 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS dashboards_reco_vaccination_all_done_view
             (
                 SELECT jsonb_agg(
                     jsonb_build_object(
-                        'family_id', f.id,
-                        'family_name', f.given_name,
-                        'family_fullname', f.name,
-                        'family_code', f.external_id,
-                        'family_phone', COALESCE(NULLIF(f.householder_phone, ''),NULLIF(f.householder_phone_other, '')),
+                        'family', jsonb_build_object(
+                            'id', f.id,
+                            'name', f.given_name,
+                            'fullname', f.name,
+                            'code', f.external_id,
+                            'phone', COALESCE(NULLIF(f.householder_phone, ''),NULLIF(f.householder_phone_other, ''))
+                        ),
                         'data', (
                                     SELECT jsonb_agg(
                                     jsonb_build_object(
-                                        'family_id', f.id,
-                                        'family_name', f.given_name,
-                                        'family_fullname', f.name,
-                                        'family_code', f.external_id,
-                                        'child_id', v.child_id,
-                                        'child_name', v.child_name,
-                                        'child_code', v.child_code,
-                                        'child_sex', v.child_sex,
+                                        'family', jsonb_build_object(
+                                            'id', f.id,
+                                            'name', f.given_name,
+                                            'fullname', f.name,
+                                            'code', f.external_id,
+                                            'phone', COALESCE(NULLIF(f.householder_phone, ''),NULLIF(f.householder_phone_other, ''))
+                                        ),
 
-                                        'reco_phone', (CASE WHEN NULLIF(v.child_phone, '') IS NOT NULL AND v.child_phone = MAX(r.phone) THEN v.child_phone
-                                                            WHEN NULLIF(f.householder_phone, '') IS NOT NULL AND f.householder_phone = MAX(r.phone) THEN f.householder_phone
-                                                            WHEN NULLIF(f.householder_phone_other, '') IS NOT NULL AND f.householder_phone_other = MAX(r.phone) THEN f.householder_phone_other
-                                                            WHEN NULLIF(MAX(r.phone), '') IS NOT NULL THEN MAX(r.phone)
-                                                            ELSE NULL
-                                                        END),
+                                        'phone', jsonb_build_object(
 
-                                        'parent_phone', (CASE WHEN NULLIF(f.householder_phone, '') IS NOT NULL AND f.householder_phone <> MAX(r.phone) THEN f.householder_phone
-                                                            ELSE NULL
-                                                        END),
+                                            'reco', (CASE WHEN NULLIF(v.child_phone, '') IS NOT NULL AND v.child_phone = MAX(r.phone) THEN v.child_phone
+                                                                WHEN NULLIF(f.householder_phone, '') IS NOT NULL AND f.householder_phone = MAX(r.phone) THEN f.householder_phone
+                                                                WHEN NULLIF(f.householder_phone_other, '') IS NOT NULL AND f.householder_phone_other = MAX(r.phone) THEN f.householder_phone_other
+                                                                WHEN NULLIF(MAX(r.phone), '') IS NOT NULL THEN MAX(r.phone)
+                                                                ELSE NULL
+                                                            END),
 
-                                        'neighbor_phone', (CASE WHEN NULLIF(f.householder_phone_other, '') IS NOT NULL AND f.householder_phone_other <> MAX(r.phone) THEN f.householder_phone_other
-                                                            ELSE NULL
-                                                          END),
+                                            'parent', (CASE WHEN NULLIF(f.householder_phone, '') IS NOT NULL AND f.householder_phone <> MAX(r.phone) THEN f.householder_phone
+                                                                ELSE NULL
+                                                            END),
 
-                                        'child_age_in_days', v.child_age_in_days,
-                                        'child_age_in_months', v.child_age_in_months,
-                                        'child_age_in_years', v.child_age_in_years,
-                                        'child_age_str', v.child_age_str,
+                                            'neighbor', (CASE WHEN NULLIF(f.householder_phone_other, '') IS NOT NULL AND f.householder_phone_other <> MAX(r.phone) THEN f.householder_phone_other
+                                                                ELSE NULL
+                                                            END)
+                                        ),
 
-                                        'vaccine_BCG', v.vaccine_BCG,
-                                        'vaccine_VPO_0', v.vaccine_VPO_0,
-                                        'vaccine_PENTA_1', v.vaccine_PENTA_1,
-                                        'vaccine_VPO_1', v.vaccine_VPO_1,
-                                        'vaccine_PENTA_2', v.vaccine_PENTA_2,
-                                        'vaccine_VPO_2', v.vaccine_VPO_2,
-                                        'vaccine_PENTA_3', v.vaccine_PENTA_3,
-                                        'vaccine_VPO_3', v.vaccine_VPO_3,
-                                        'vaccine_VPI_1', v.vaccine_VPI_1,
-                                        'vaccine_VAR_1', v.vaccine_VAR_1,
-                                        'vaccine_VAA', v.vaccine_VAA,
-                                        'vaccine_VPI_2', v.vaccine_VPI_2,
-                                        'vaccine_MEN_A', v.vaccine_MEN_A,
-                                        'vaccine_VAR_2', v.vaccine_VAR_2,
 
-                                        'vaccine_BCG_date', v.vaccine_BCG_date,
-                                        'vaccine_VPO_0_date', v.vaccine_VPO_0_date,
-                                        'vaccine_PENTA_1_date', v.vaccine_PENTA_1_date,
-                                        'vaccine_VPO_1_date', v.vaccine_VPO_1_date,
-                                        'vaccine_PENTA_2_date', v.vaccine_PENTA_2_date,
-                                        'vaccine_VPO_2_date', v.vaccine_VPO_2_date,
-                                        'vaccine_PENTA_3_date', v.vaccine_PENTA_3_date,
-                                        'vaccine_VPO_3_date', v.vaccine_VPO_3_date,
-                                        'vaccine_VPI_1_date', v.vaccine_VPI_1_date,
-                                        'vaccine_VAR_1_date', v.vaccine_VAR_1_date,
-                                        'vaccine_VAA_date', v.vaccine_VAA_date,
-                                        'vaccine_VPI_2_date', v.vaccine_VPI_2_date,
-                                        'vaccine_MEN_A_date', v.vaccine_MEN_A_date,
-                                        'vaccine_VAR_2_date', v.vaccine_VAR_2_date
+                                        'child', jsonb_build_object(
+                                            'id', v.child_id,
+                                            'name', v.child_name,
+                                            'code', v.child_code,
+                                            'sex', v.child_sex,
+
+                                            'age_in_days', v.child_age_in_days,
+                                            'age_in_months', v.child_age_in_months,
+                                            'age_in_years', v.child_age_in_years,
+                                            'age_str', v.child_age_str
+                                        ),
+
+                                        'BCG', jsonb_build_object('done',v.vaccine_BCG, 'date', v.vaccine_BCG_date, 'reason', v.no_BCG_reason),
+                                        'VPO_0', jsonb_build_object('done',v.vaccine_VPO_0, 'date', v.vaccine_VPO_0_date, 'reason', v.no_VPO_0_reason),
+                                        'PENTA_1', jsonb_build_object('done',v.vaccine_PENTA_1, 'date', v.vaccine_PENTA_1_date, 'reason', v.no_PENTA_1_reason),
+                                        'VPO_1', jsonb_build_object('done',v.vaccine_VPO_1, 'date', v.vaccine_VPO_1_date, 'reason', v.no_VPO_1_reason),
+                                        'PENTA_2', jsonb_build_object('done',v.vaccine_PENTA_2, 'date', v.vaccine_PENTA_2_date, 'reason', v.no_PENTA_2_reason),
+                                        'VPO_2', jsonb_build_object('done',v.vaccine_VPO_2, 'date', v.vaccine_VPO_2_date, 'reason', v.no_VPO_2_reason),
+                                        'PENTA_3', jsonb_build_object('done',v.vaccine_PENTA_3, 'date', v.vaccine_PENTA_3_date, 'reason', v.no_PENTA_3_reason),
+                                        'VPO_3', jsonb_build_object('done',v.vaccine_VPO_3, 'date', v.vaccine_VPO_3_date, 'reason', v.no_VPO_3_reason),
+                                        'VPI_1', jsonb_build_object('done',v.vaccine_VPI_1, 'date', v.vaccine_VPI_1_date, 'reason', v.no_VPI_1_reason),
+                                        'VAR_1', jsonb_build_object('done',v.vaccine_VAR_1, 'date', v.vaccine_VAR_1_date, 'reason', v.no_VAR_1_reason),
+                                        'VAA', jsonb_build_object('done',v.vaccine_VAA, 'date', v.vaccine_VAA_date, 'reason', v.no_VAA_reason),
+                                        'VPI_2', jsonb_build_object('done',v.vaccine_VPI_2, 'date', v.vaccine_VPI_2_date, 'reason', v.no_VPI_2_reason),
+                                        'MEN_A', jsonb_build_object('done',v.vaccine_MEN_A, 'date', v.vaccine_MEN_A_date, 'reason', v.no_MEN_A_reason),
+                                        'VAR_2', jsonb_build_object('done',v.vaccine_VAR_2, 'date', v.vaccine_VAR_2_date, 'reason', v.no_VAR_2_reason)
                                     ) ORDER BY v.child_name
                                 )
                                 FROM dash_max_vaccination_view v
@@ -140,6 +137,6 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS dashboards_reco_vaccination_all_done_view
                 FROM jsonb_array_elements(family->'data') AS child 
                 WHERE 
                     jsonb_typeof(child) = 'object'
-                    AND COALESCE(child->>'child_name', '') <> ''
+                    AND NULLIF(child->'child'->>'name', '') IS NOT NULL
             )
     );

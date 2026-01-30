@@ -1,6 +1,6 @@
 
 import { Router } from 'express';
-import { Middelware } from "../middleware/auth";
+import { Middelware } from "../middleware/middleware";
 import { OrgUnitsController } from '../controllers/ORGUNITS/org-units-orm';
 
 const OrgUnitsRouter = Router();

@@ -1,7 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 import { ENV } from '../providers/constantes';
 import { AppDataSource } from '../data-source';
-import { notEmpty } from '../functions/functions';
+import { notEmpty } from '../utils/functions';
 import { GetRolesAndNamesPagesAuthorizations, Roles } from './Roles';
 import { Entity, Column, Repository, DataSource, PrimaryColumn, In } from "typeorm"
 import { ROUTES_LIST, AUTHORIZATIONS_LIST, _superuser, can_use_offline_mode, roleAuthorizations } from '../providers/authorizations-pages';

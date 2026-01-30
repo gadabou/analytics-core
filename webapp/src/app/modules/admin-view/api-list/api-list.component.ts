@@ -1,132 +1,126 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { AuthService } from '@kossi-app/services/auth.service';
 import { ApiTokenAccess } from '@kossi-models/api-token';
 import { ApiService } from '@kossi-services/api.service';
 
-declare var $: any;
-declare var showToast: any;
 @Component({
   standalone: false,
   selector: 'app-admin-api',
-  templateUrl: `./api-list.component.html`,
-
+  templateUrl: './api-list.component.html',
+  styleUrls: ['./api-list.component.css']
 })
 export class ApiComponent implements OnInit {
-
   apis$: ApiTokenAccess[] = [];
   apiForm!: FormGroup;
-  isLoading: boolean = false;
-  LoadingMsg: string = "Loading...";
+  apiAction: string = '';
   isEditMode: boolean = false;
   selectedApi!: ApiTokenAccess | null;
   message: string = '';
-  tokenLenght:number = 0;
-  defaultTokenLenght:number = 30;
 
-  constructor(private auth: AuthService, private api: ApiService) {
-  }
+  tokenLenMin: number = 0;
+  tokenLenMax: number = 30;
+
+  showModalFlag: boolean = false;
+  showDeleteModalFlag: boolean = false;
+
+  isActiving: boolean = false;
+  loading: boolean = false;
+
+  constructor(private api: ApiService) { }
 
   ngOnInit(): void {
     this.GetApis();
     this.apiForm = this.createFormGroup();
   }
 
-  generateTokenLenght(event:Event){
-    const inputElement = event.target as HTMLInputElement;
-    if(inputElement){
-      this.tokenLenght = (inputElement.value ?? '').length
+  openModal(action: 'create' | 'refresh' | 'delete', api?: ApiTokenAccess) {
+    this.message = '';
+    this.apiAction = action ?? ''
+    this.selectedApi = api ?? null;
+    this.apiForm = this.createFormGroup();
+    this.isEditMode = action === 'refresh';
+
+    if (['create', 'refresh'].includes(action)) {
+      this.showModalFlag = true;
+    } else if (action === 'delete' && api) {
+      this.showDeleteModalFlag = true;
     }
   }
 
-  GetApis() {
-    this.api.ApiTokenAccessAction({ action: 'list' }).subscribe(async (_c$: { status: number, data: ApiTokenAccess[] }) => {
-      if (_c$.status == 200) this.apis$ = _c$.data;
-    }, (err: any) => { });
-  }
-
-  EditApi(role: ApiTokenAccess) {
-    this.isEditMode = true;
-    this.apiForm = this.createFormGroup(role);
-    this.ApiSelected(role);
-  }
-
-  ApiSelected(role: ApiTokenAccess) {
-    this.selectedApi = role;
-    this.message = '';
-  }
-
-  DeleteApi() {
-    this.isEditMode = false;
-    if (this.selectedApi) this.api.ApiTokenAccessAction({ action: 'list', id: this.selectedApi.id }).subscribe((res: { status: number, data: any }) => {
-      if (res.status === 200) {
-        this.showModalToast('success', 'Supprimé avec success')
-        this.GetApis();
-        this.selectedApi = null;
-        this.isLoading = false;
-        this.message = '';
-      } else {
-        this.message = res.data;
-      }
-      console.log(this.message);
-    }, (err: any) => {
-      this.message = err;
-      this.isLoading = false;
-      console.log(this.message);
-    });
-  }
-
-  CreateApi() {
-    this.isEditMode = false;
-    this.apiForm = this.createFormGroup();
-    this.selectedApi = null;
-    this.message = '';
+  closeModal() {
+    this.showModalFlag = false;
+    this.showDeleteModalFlag = false;
   }
 
   createFormGroup(api?: ApiTokenAccess): FormGroup {
-    const formControls = {
-      token: new FormControl(api != null ? api.token : '', [Validators.required, Validators.minLength(this.defaultTokenLenght), Validators.maxLength(this.defaultTokenLenght)]),
-      isActive: new FormControl(api != null ? api.isActive : false),
-    };
-    return new FormGroup(formControls);
+    return new FormGroup({
+      tokenLen: new FormControl(api?.tokenLen || 10, [Validators.required]),
+      isActive: new FormControl(api?.isActive || false)
+    });
   }
 
-  showModalToast(icon: string, title: string) {
-    showToast(icon, title);
-    this.closeModal('close-delete-modal');
+  GetApis() {
+    this.api.ApiTokenAccessAction({ action: 'list' }).subscribe((res: any) => {
+      if (res.status === 200) this.apis$ = res.data;
+    });
   }
 
-  closeModal(btnId: string = 'close-modal') {
-    $('#' + btnId).trigger('click');
-  }
+  CreateOrUpdateApi() {
+    if (!this.apiForm.valid) return;
 
-  CreateOrUpdateApi(): any {
-    var request: any;
-    if (this.isEditMode) {
-      if (this.selectedApi) {
-        request = this.api.ApiTokenAccessAction({ action: 'update', id: this.selectedApi.id, token: this.apiForm.value.token, isActive: this.apiForm.value.isActive });
+    this.loading = true;
+    const { tokenLen, isActive } = this.apiForm.value;
+
+    let request$;
+    if (this.isEditMode && this.selectedApi && this.apiAction === 'refresh') {
+      request$ = this.api.ApiTokenAccessAction({ action: this.apiAction, id: this.selectedApi.id, tokenLen, isActive });
+    } else if (this.apiAction === 'create') {
+      request$ = this.api.ApiTokenAccessAction({ action: this.apiAction, tokenLen });
+    }
+
+    request$?.subscribe((res: any) => {
+      if (res.status === 200) {
+        this.GetApis();
+        this.closeModal();
+      } else {
+        this.message = res.data;
       }
-    } else {
-      request = this.api.ApiTokenAccessAction({ action: 'create', token: this.apiForm.value.token, isActive: this.apiForm.value.isActive });
-    }
-
-    if (request) {
-      return request.subscribe((res: { status: number, data: any }) => {
-        if (res.status === 200) {
-          this.message = 'Registed successfully !'
-          this.closeModal();
-          this.GetApis();
-          this.selectedApi = null;
-          this.message = '';
-        } else {
-          this.message = res.data;
-        }
-        console.log(this.message);
-        this.isLoading = false;
-      }, (err: any) => {
-        this.isLoading = false;
-      });
-    }
+      this.loading = false;
+    }, (err: any) => {
+      this.message = 'Erreur serveur';
+      this.loading = false;
+    });
   }
 
+  SetActive(api: ApiTokenAccess) {
+    this.isActiving = true;
+    const params = { action: 'update', id: api.id, isActive: !api.isActive };
+    this.api.ApiTokenAccessAction(params).subscribe((res: any) => {
+      if (res.status === 200) {
+        this.GetApis();
+        this.closeModal();
+      } else {
+        this.message = res.data;
+      }
+      this.isActiving = false;
+    }, (err: any) => {
+      this.message = 'Erreur serveur';
+      this.isActiving = false;
+    });
+  }
+
+  DeleteApi() {
+    if (!this.selectedApi) return;
+
+    this.api.ApiTokenAccessAction({ action: 'delete', id: this.selectedApi.id }).subscribe((res: any) => {
+      if (res.status === 200) {
+        this.GetApis();
+        this.closeModal();
+      } else {
+        this.message = res.data;
+      }
+    }, (err: any) => {
+      this.message = 'Erreur serveur';
+    });
+  }
 }

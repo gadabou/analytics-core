@@ -148,9 +148,9 @@ export class AuthService {
 
 
   async logout(): Promise<any> {
-    await this.indexdb.deleteAllFromDB({ dbName: 'token' });
-    this.store.delete({ db: 'session', name: 'lastVisitedUrl' });
-    location.href = "auths/login";
+    // await this.indexdb.deleteAllFromDB({ dbName: 'token' });
+    // this.store.delete({ db: 'session', name: 'lastVisitedUrl' });
+    // location.href = "auths/login";
 
     // const namesToDelete = ['token', 'countries', 'regions', 'prefectures', 'communes', 'hospitals', 'districtQuartiers', 'villageSecteurs', 'chws', 'recos'];
     // this.store.deleteSelected({ db: 'local', names: namesToDelete });

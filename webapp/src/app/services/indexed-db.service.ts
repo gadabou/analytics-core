@@ -10,18 +10,19 @@ import { DatabaseName } from '@kossi-models/db';
 export class IndexedDbService {
   constructor() { }
   // private readonly dbName = 'APP_DATABASE';
-  private dbVersion = 1;
+  private DB_VERSION = 1;
   private readonly keyPath: string = 'id';
 
 
   private async openDatabase({ dbName, keyPath, callBack }: { dbName: DatabaseName, keyPath?: string; callBack?: () => void }): Promise<IDBDatabase> {
     return new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(dbName, this.dbVersion);
+      const request = indexedDB.open(dbName, this.DB_VERSION);
       request.onerror = () => {
         reject(`❌ Error opening IndexedDB '${dbName}'`);
       };
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
+        const oldVersion = event.oldVersion;
         // console.log(`🔄 Upgrading IndexedDB '${dbName}'...`);
         if (callBack) callBack();
         if (!db.objectStoreNames.contains(dbName)) {
@@ -323,7 +324,7 @@ export class IndexedDbService {
 
 
   watchChanges(dbName: DatabaseName, callback?: () => void) {
-    const request = indexedDB.open(dbName, this.dbVersion);
+    const request = indexedDB.open(dbName, this.DB_VERSION);
 
     request.onsuccess = (event: Event) => {
       const db = (event.target as IDBRequest).result as IDBDatabase;
