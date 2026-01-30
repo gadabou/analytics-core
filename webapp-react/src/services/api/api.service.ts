@@ -23,6 +23,8 @@ import {
   AdminApiMock,
   OrganizationsApiMock,
   PermissionsApiMock,
+  VisualizationsApiMock,
+  type StoredVisualization,
 } from './api.mock.service';
 
 // ============================================
@@ -739,6 +741,51 @@ const _RealPermissionsApi = {
 };
 
 // ============================================
+// VISUALIZATIONS API (Version réelle - backend)
+// ============================================
+const _RealVisualizationsApi = {
+  getVisualizations: async (params?: { type?: 'dashboard' | 'report' }) => {
+    const response = await axiosInstance.post<ApiResponse>('/visualizations/list', withUserId(params || {}));
+    return response.data;
+  },
+
+  getVisualization: async (id: string) => {
+    const response = await axiosInstance.post<ApiResponse>('/visualizations/get', withUserId({ id }));
+    return response.data;
+  },
+
+  createVisualization: async (viz: Omit<StoredVisualization, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const response = await axiosInstance.post<ApiResponse>('/visualizations/create', withUserId(viz));
+    return response.data;
+  },
+
+  updateVisualization: async (id: string, viz: Partial<StoredVisualization>) => {
+    const response = await axiosInstance.post<ApiResponse>('/visualizations/update', withUserId({ id, ...viz }));
+    return response.data;
+  },
+
+  deleteVisualization: async (id: string) => {
+    const response = await axiosInstance.post<ApiResponse>('/visualizations/delete', withUserId({ id }));
+    return response.data;
+  },
+
+  getDimensionData: async () => {
+    const response = await axiosInstance.post<ApiResponse>('/visualizations/dimensions', withUserId({}));
+    return response.data;
+  },
+
+  getAnalyticsData: async (params: {
+    dataElements?: string[];
+    indicators?: string[];
+    periods?: string[];
+    orgUnits?: string[];
+  }) => {
+    const response = await axiosInstance.post<ApiResponse>('/visualizations/analytics', withUserId(params));
+    return response.data;
+  },
+};
+
+// ============================================
 // EXPORT ALL APIs - Utilise Mock si activé
 // ============================================
 
@@ -757,6 +804,7 @@ export const SurveyApi = USE_MOCK_API ? SurveyApiMock : _RealSurveyApi;
 export const AdminApi = USE_MOCK_API ? AdminApiMock : _RealAdminApi;
 export const OrganizationsApi = USE_MOCK_API ? OrganizationsApiMock : _RealOrganizationsApi;
 export const PermissionsApi = USE_MOCK_API ? PermissionsApiMock : _RealPermissionsApi;
+export const VisualizationsApi = USE_MOCK_API ? VisualizationsApiMock : _RealVisualizationsApi;
 
 export const Api = {
   auth: AuthApi,
@@ -773,6 +821,7 @@ export const Api = {
   admin: AdminApi,
   organizations: OrganizationsApi,
   permissions: PermissionsApi,
+  visualizations: VisualizationsApi,
 };
 
 export default Api;

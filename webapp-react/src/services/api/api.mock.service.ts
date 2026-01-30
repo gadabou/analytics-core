@@ -885,6 +885,143 @@ export const PermissionsApiMock = {
 };
 
 // ============================================
+// VISUALIZATIONS API MOCK
+// ============================================
+export interface StoredVisualization {
+  id: string;
+  name: string;
+  description?: string;
+  type: 'dashboard' | 'report';
+  chartType: string;
+  columns: { dimension: string; items: string[] }[];
+  rows: { dimension: string; items: string[] }[];
+  filters: { dimension: string; items: string[] }[];
+  options: {
+    title?: string;
+    subtitle?: string;
+    showLegend: boolean;
+    showTooltip: boolean;
+    showGrid: boolean;
+    stacked: boolean;
+    animation: boolean;
+    colors?: string[];
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DimensionItem {
+  id: string;
+  name: string;
+  code?: string;
+}
+
+export const VisualizationsApiMock = {
+  // Get all visualizations
+  getVisualizations: async (params?: { type?: 'dashboard' | 'report' }) => {
+    await delay(300);
+    const query = params?.type ? { where: { type: params.type } } : {};
+    const { items } = db.list<StoredVisualization>('visualizations', {
+      ...query,
+      sortBy: 'updatedAt',
+      sortDir: 'desc',
+    });
+    return success(items);
+  },
+
+  // Get single visualization
+  getVisualization: async (id: string) => {
+    await delay(200);
+    const viz = db.getById<StoredVisualization>('visualizations', id);
+    if (!viz) {
+      return { status: 404, data: null, message: 'Visualisation non trouvée' };
+    }
+    return success(viz);
+  },
+
+  // Create visualization
+  createVisualization: async (viz: Omit<StoredVisualization, 'id' | 'createdAt' | 'updatedAt'>) => {
+    await delay(400);
+    const newViz = db.create<StoredVisualization>('visualizations', {
+      ...viz,
+      id: `viz-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    return success(newViz, 'Visualisation créée');
+  },
+
+  // Update visualization
+  updateVisualization: async (id: string, viz: Partial<StoredVisualization>) => {
+    await delay(300);
+    const updated = db.update<StoredVisualization>('visualizations', id, {
+      ...viz,
+      updatedAt: new Date().toISOString(),
+    });
+    return success(updated, 'Visualisation mise à jour');
+  },
+
+  // Delete visualization
+  deleteVisualization: async (id: string) => {
+    await delay(300);
+    db.delete('visualizations', id);
+    return success(null, 'Visualisation supprimée');
+  },
+
+  // Get dimension data (data elements, indicators, periods, org units)
+  getDimensionData: async () => {
+    await delay(200);
+    const dataElements = db.list<DimensionItem>('visualization_data_elements').items;
+    const indicators = db.list<DimensionItem>('visualization_indicators').items;
+    const periods = db.list<DimensionItem>('visualization_periods').items;
+    const orgUnits = db.list<DimensionItem>('visualization_org_units').items;
+
+    return success({
+      dataElements,
+      indicators,
+      periods,
+      orgUnits,
+    });
+  },
+
+  // Get analytics data for a visualization
+  getAnalyticsData: async (params: {
+    dataElements?: string[];
+    indicators?: string[];
+    periods?: string[];
+    orgUnits?: string[];
+  }) => {
+    await delay(500);
+    // Generate mock analytics data based on params
+    const rows: Record<string, unknown>[] = [];
+    const dx = [...(params.dataElements || []), ...(params.indicators || [])];
+    const pe = params.periods || ['202401', '202402', '202403'];
+    const ou = params.orgUnits || ['ou1'];
+
+    for (const period of pe) {
+      for (const orgUnit of ou) {
+        const row: Record<string, unknown> = {
+          period,
+          orgUnit,
+        };
+        for (const dataItem of dx) {
+          row[dataItem] = Math.floor(Math.random() * 500) + 50;
+        }
+        rows.push(row);
+      }
+    }
+
+    return success({
+      headers: ['period', 'orgUnit', ...dx],
+      rows,
+      metaData: {
+        dimensions: { dx, pe, ou },
+      },
+    });
+  },
+};
+
+// ============================================
 // EXPORT MOCK APIs
 // ============================================
 export const ApiMock = {
@@ -902,6 +1039,7 @@ export const ApiMock = {
   admin: AdminApiMock,
   organizations: OrganizationsApiMock,
   permissions: PermissionsApiMock,
+  visualizations: VisualizationsApiMock,
 };
 
 export default ApiMock;

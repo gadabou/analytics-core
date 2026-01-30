@@ -1,9 +1,11 @@
 /**
- * Hook for fetching and managing visualizations from the database
+ * Hook for fetching and managing visualizations
+ * Uses VisualizationsApi which automatically switches between Mock (localStorage) and Real API
+ * based on the USE_MOCK_API flag in api.service.ts
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { db, initializeTestData } from '@/utils/TestData';
+import { VisualizationsApi } from '@/services/api';
 import type { ChartDataItem } from '@components/charts';
 
 // ============================================================================
@@ -93,6 +95,19 @@ interface DimensionItem {
   id: string;
   name: string;
   code?: string;
+}
+
+interface DimensionData {
+  dataElements: DimensionItem[];
+  indicators: DimensionItem[];
+  periods: DimensionItem[];
+  orgUnits: DimensionItem[];
+}
+
+interface ApiResponse<T> {
+  status: number;
+  data: T;
+  message?: string;
 }
 
 function generateVisualizationData(
@@ -195,43 +210,31 @@ export function useVisualizations(type?: VisualizationType) {
   const [periods, setPeriods] = useState<DimensionItem[]>([]);
   const [orgUnits, setOrgUnits] = useState<DimensionItem[]>([]);
 
-  const loadDimensionData = useCallback(() => {
+  const loadDimensionData = useCallback(async () => {
     try {
-      initializeTestData();
-      const { items: de } = db.list<DimensionItem>('visualization_data_elements');
-      const { items: ind } = db.list<DimensionItem>('visualization_indicators');
-      const { items: pe } = db.list<DimensionItem>('visualization_periods');
-      const { items: ou } = db.list<DimensionItem>('visualization_org_units');
+      const response = await VisualizationsApi.getDimensionData() as ApiResponse<DimensionData>;
+      const dimensionData = response.data;
 
-      setDataElements(de);
-      setIndicators(ind);
-      setPeriods(pe);
-      setOrgUnits(ou);
+      setDataElements(dimensionData.dataElements || []);
+      setIndicators(dimensionData.indicators || []);
+      setPeriods(dimensionData.periods || []);
+      setOrgUnits(dimensionData.orgUnits || []);
     } catch (err) {
       console.error('[useVisualizations] Failed to load dimension data', err);
     }
   }, []);
 
-  const loadVisualizations = useCallback(() => {
+  const loadVisualizations = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      initializeTestData();
-
       // Load dimension data first
-      loadDimensionData();
+      await loadDimensionData();
 
-      // Fetch visualizations
-      const query: { where?: Partial<StoredVisualization> } = {
-        ...(type && { where: { type } }),
-      };
-
-      const { items } = db.list<StoredVisualization>('visualizations', {
-        ...query,
-        sortBy: 'updatedAt',
-        sortDir: 'desc',
-      });
+      // Fetch visualizations via API
+      const response = await VisualizationsApi.getVisualizations(type ? { type } : undefined) as ApiResponse<StoredVisualization[]>;
+      const items = response.data || [];
 
       // Generate data for each visualization
       const visualizationsWithData: VisualizationWithData[] = items.map((viz) => {
@@ -277,9 +280,9 @@ export function useVisualizations(type?: VisualizationType) {
   }, [loadVisualizations]);
 
   // Delete visualization
-  const deleteVisualization = useCallback((id: string) => {
+  const deleteVisualization = useCallback(async (id: string) => {
     try {
-      db.delete('visualizations', id);
+      await VisualizationsApi.deleteVisualization(id);
       setVisualizations((prev) => prev.filter((v) => v.id !== id));
       return true;
     } catch (err) {
